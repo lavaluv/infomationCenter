@@ -1,2 +1,0 @@
-# infomationCenter
-bupt information center
