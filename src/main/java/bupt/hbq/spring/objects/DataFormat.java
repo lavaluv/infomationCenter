@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+
 @SuppressWarnings("hiding")
 @ToString @EqualsAndHashCode
 public class DataFormat<Object> {
