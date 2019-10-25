@@ -1,26 +1,40 @@
 package bupt.hbq.spring;
 
-import java.util.HashMap;
-import java.util.Random;
+import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLDecoder;
 
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
-import bupt.hbq.spring.dao.InfoRespository;
-import bupt.hbq.spring.dao.TrojanRespository;
-import bupt.hbq.spring.dao.TrojanViewRespository;
 import bupt.hbq.spring.dao.UserRespository;
-import bupt.hbq.spring.objects.Trojan;
-import bupt.hbq.spring.objects.TrojanView;
 import bupt.hbq.spring.objects.User;
-import bupt.hbq.spring.objects.info.Info;
 
 @SpringBootApplication
 public class Application {
-
+//	public static final String JAR_PATH = getRealPath();
+//	public static String DATA_INPUT_DIR;
+//	public static String getRealPath() {
+//        String realPath = Application.class.getClassLoader().getResource("")
+//                .getFile();
+//        java.io.File file = new java.io.File(realPath);
+//        realPath = file.getAbsolutePath();
+//        try {
+//            realPath = java.net.URLDecoder.decode(realPath, "utf-8");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        if (realPath.split("file:")[0]!="") {
+//			realPath = realPath.split("file:")[0];
+//		}
+//        return realPath;
+//    }
 	public static void main(String[] args) {
+//		DATA_INPUT_DIR = JAR_PATH+args[0];
+//		System.out.println(DATA_INPUT_DIR);
 		SpringApplication.run(Application.class, args);
 	}
 	

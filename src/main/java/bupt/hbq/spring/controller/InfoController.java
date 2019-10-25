@@ -3,14 +3,12 @@ package bupt.hbq.spring.controller;
 import java.util.List;
 import java.util.Random;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.async.DeferredResult;
 
 import bupt.hbq.spring.dao.InfoRespository;
 import bupt.hbq.spring.dao.TrojanRespository;
@@ -20,7 +18,6 @@ import bupt.hbq.spring.objects.info.FlowNum;
 import bupt.hbq.spring.objects.info.Info;
 import bupt.hbq.spring.objects.info.PackageNum;
 import bupt.hbq.spring.objects.info.ThreatNum;
-import bupt.hbq.spring.service.InfoPushService;
 
 @RestController
 public class InfoController {
@@ -122,12 +119,5 @@ public class InfoController {
 		}
 		trojanRespository.deleteAllInBatch();
 		return dataFormat;
-	}
-	@Autowired
-	InfoPushService service;
-	@GetMapping("/pushInfo")
-	@CrossOrigin(origins = "http://localhost:4200")
-	public DeferredResult<Info> pushInfos(){
-		return service.getDeferredResult();
 	}
 }
