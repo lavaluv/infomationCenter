@@ -18,6 +18,13 @@ public class Info {
 	private long threatNum;
 	private long handledNum;
 	private long notHandleNum;
+	public Info() {
+		flowNum = 0;
+		packageNum = 0;
+		threatNum = 0;
+		handledNum = 0;
+		notHandleNum = 0;
+	}
 	public void setTime(String time) {
 		this.time = time;
 	}

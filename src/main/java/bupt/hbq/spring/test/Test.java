@@ -1,242 +1,197 @@
 package bupt.hbq.spring.test;
 
 import java.io.EOFException;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.nio.charset.Charset;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
 
 import org.pcap4j.core.NotOpenException;
-import org.pcap4j.core.PacketListener;
 import org.pcap4j.core.PcapHandle;
-import org.pcap4j.core.PcapHandle.TimestampPrecision;
 import org.pcap4j.core.PcapNativeException;
 import org.pcap4j.core.Pcaps;
-import org.pcap4j.packet.DnsPacket;
-import org.pcap4j.packet.DnsQuestion;
-import org.pcap4j.packet.DnsResourceRecord;
-import org.pcap4j.packet.DnsPacket.DnsHeader;
 import org.pcap4j.packet.IpPacket;
 import org.pcap4j.packet.IpPacket.IpHeader;
+import org.pcap4j.packet.TcpPacket.TcpHeader;
+import org.pcap4j.packet.UdpPacket.UdpHeader;
 import org.pcap4j.packet.Packet;
 import org.pcap4j.packet.TcpPacket;
 import org.pcap4j.packet.UdpPacket;
-import org.pcap4j.packet.factory.PacketFactoryBinder;
-import org.pcap4j.packet.namednumber.DnsClass;
-import org.pcap4j.packet.namednumber.DnsOpCode;
-import org.pcap4j.packet.namednumber.DnsResourceRecordType;
+import org.pcap4j.packet.namednumber.TcpPort;
+import org.pcap4j.packet.namednumber.UdpPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import com.csvreader.CsvReader;
-import com.csvreader.CsvWriter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.maxmind.geoip2.DatabaseReader;
-import com.maxmind.geoip2.exception.GeoIp2Exception;
-import com.maxmind.geoip2.model.AsnResponse;
-import com.maxmind.geoip2.model.CountryResponse;
 
-import bupt.hbq.spring.service.ImageHandler;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 @ToString @EqualsAndHashCode
 public class Test {
-//	public static void main(String[] args)throws Exception{
-//        // test jackson
-////		Info info = new Info();
-////		info.setTime(String.valueOf(System.currentTimeMillis()));
-////		ObjectMapper mapper = new ObjectMapper();
-////		String reString = mapper.writeValueAsString(info);
-////		System.out.println(reString);
-//        //test http get
-////		RestTemplate restTemplate = new RestTemplate();
-////		ResponseEntity<String> responseEntity = restTemplate.getForEntity("http://127.0.0.1:5000/api/test", String.class);
-////		System.out.println(responseEntity.getBody());
-////		ObjectMapper mapper = new ObjectMapper();
-////		@SuppressWarnings("unchecked")
-////		HashMap<String, HashMap<String, Object>> map = mapper.readValue(responseEntity.getBody(), HashMap.class);
-////		System.out.println(map.get("tasks"));
-//		//test http post
+	public static void main(String[] args)throws Exception{
+        // test jackson
+//		Info info = new Info();
+//		info.setTime(String.valueOf(System.currentTimeMillis()));
+//		ObjectMapper mapper = new ObjectMapper();
+//		String reString = mapper.writeValueAsString(info);
+//		System.out.println(reString);
+        //test http get
 //		RestTemplate restTemplate = new RestTemplate();
-//		String url = "http://10.3.200.130:8501/v1/models/cnn:predict";
-//		String path = "src/main/resources/static/trojanImages/normal.png";
-//		HttpHeaders headers = new HttpHeaders();
-//		headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
-//		HashMap<String, int[]> map = new HashMap<String, int[]>();
-//		ImageHandler imageHandler = new ImageHandler();
-//		int[] image = imageHandler.imageToDoubleArray(path);
-//		map.put("instances",image);
-//		
-//		HttpEntity<HashMap<String, int[]>> request = new HttpEntity<HashMap<String,int[]>>(map,headers);
-//		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, request, String.class);
+//		ResponseEntity<String> responseEntity = restTemplate.getForEntity("http://127.0.0.1:5000/api/test", String.class);
 //		System.out.println(responseEntity.getBody());
 //		ObjectMapper mapper = new ObjectMapper();
 //		@SuppressWarnings("unchecked")
-//		HashMap<String, ArrayList<HashMap<String, Object>>> result = mapper.readValue(responseEntity.getBody(), HashMap.class);
-//		System.out.println(result.get("predictions"));
-//		//test imageHandler
-////		String path = "src/main/resources/static/trojanImages/test.png";
-////		ImageHandler handler = new ImageHandler();
-////		System.out.println(handler.imageToDoubleArray(path).length);
-//	}
-	private static final String PCAP_FILE_KEY = Test.class.getName() + ".pcapFile";
-	private static final String PCAP_FILE =
-	      System.getProperty(PCAP_FILE_KEY, "src/main/resources/pcap/ori/test.pcap");
-	private static final String PCAP_OUT = "src/main/resources/pcap/csv/test.csv";
-	private static final String COUNTRY_DATABASE = "src/main/resources/geoIP/GeoLite2-Country.mmdb";
-	private static final String ASN_DATABASE = "src/main/resources/geoIP/GeoLite2-ASN.mmdb";
-	//@org.junit.Test
-	public void pcap() throws PcapNativeException, NotOpenException, InterruptedException, IOException{
-	    PcapHandle handle;
-	    handle = Pcaps.openOffline(PCAP_FILE);
-		File countryData = new File(COUNTRY_DATABASE);
-		DatabaseReader countryReader = new DatabaseReader.Builder(countryData).build();
-		File asnData = new File(ASN_DATABASE);
-		DatabaseReader asnReader = new DatabaseReader.Builder(asnData).build();
-	    HashMap<String, double[]> outMap = new HashMap<String, double[]>();
-	    HashMap<String, Integer> map = new HashMap<String, Integer>(); 
-		CsvWriter csvWriter = new CsvWriter(PCAP_OUT, ',',Charset.forName("GBK"));
-		String[] header = {"name","ip_nums","asn_nums","country_nums","Querty_time","Message Size"};
-		csvWriter.writeRecord(header);
-	    while(true) {
-	      try {
-	        Packet packet = handle.getNextPacketEx();
-	        Timestamp ts = handle.getTimestamp();
-	        if (packet.contains(IpPacket.class)) {
-				IpPacket ipPacket = packet.get(IpPacket.class);
-				IpHeader ipHeader = ipPacket.getHeader();
-				InetAddress srcAddress = ipHeader.getSrcAddr();
-				InetAddress desAddress = ipHeader.getDstAddr();
-				if (ipPacket.contains(UdpPacket.class) || ipPacket.contains(TcpPacket.class)) {
-					Packet udpOrIpPacket = ipPacket.contains(UdpPacket.class)?(UdpPacket)ipPacket.get(UdpPacket.class):
-						(TcpPacket)ipPacket.get(TcpPacket.class);
-					if (udpOrIpPacket.contains(DnsPacket.class)) {
-						DnsPacket dnsPacket = udpOrIpPacket.get(DnsPacket.class);
-						DnsHeader dnsHeader = dnsPacket.getHeader();
-						if (dnsHeader.getOpCode() == DnsOpCode.QUERY) {
-							if (dnsHeader.getQdCount() == 1) {
-								DnsQuestion question = dnsHeader.getQuestions().get(0);
-								if ((question.getQType() == DnsResourceRecordType.A || 
-										question.getQType() == DnsResourceRecordType.AAAA) &&
-										question.getQClass() == DnsClass.IN) {
-									if (!dnsHeader.isResponse()) {
-										map.put(srcAddress.getHostAddress()+desAddress.getHostAddress()+
-												String.valueOf(dnsHeader.getId()),ts.getNanos());									
-									}
-									else {
-										List<DnsResourceRecord> records = dnsHeader.getAnswers();
-										int c_an = dnsHeader.getAnCount();
-										for (DnsResourceRecord r : records) {
-											if (r.getDataType() != DnsResourceRecordType.A &&
-													r.getDataType() != DnsResourceRecordType.AAAA) {
-												c_an--;
-											}
-										}
-										if (c_an > 0) {
-											HashSet<String> country = new HashSet<String>();
-											HashSet<Integer> asn = new HashSet<Integer>();
-											//hostName
-											String hostName = question.getQName().getName();
-											String name = desAddress.getHostAddress()+srcAddress.getHostAddress()+
-													String.valueOf(dnsHeader.getId());	
-											//ipNums
-											int ipNums = 0;	
-											//queryTime
-											double queryTime = 0;
-											if (map.containsKey(name)) {
-												queryTime = (ts.getNanos() - map.get(name)) > 0?
-														(ts.getNanos() - map.get(name))/1000000.0:1000+(ts.getNanos() - map.get(name))/1000000.0;
-												map.remove(name);
-											}
-											//asnNum,countryNum
-											for (DnsResourceRecord r : records) {
-												try {
-													String inetAddress = "";
-													if (r.getDataType() == DnsResourceRecordType.A && r.getDataClass() == DnsClass.IN) {
-														inetAddress = Inet4Address.getByAddress(r.getRData().getRawData()).getHostAddress();
-														ipNums++;
-													}
-													else if (r.getDataType() == DnsResourceRecordType.AAAA && r.getDataClass() == DnsClass.IN) {
-														inetAddress = Inet6Address.getByAddress(r.getRData().getRawData()).getHostAddress();
-														ipNums++;
-													}
-													CountryResponse countryResponse = countryReader.country(InetAddress.getByName(inetAddress));
-													AsnResponse asnResponse = asnReader.asn(InetAddress.getByName(inetAddress));
-													if (!country.contains(countryResponse.getCountry().getName())) {
-														country.add(countryResponse.getCountry().getName());
-													}
-													if (!asn.contains(asnResponse.getAutonomousSystemNumber())) {
-														asn.add(asnResponse.getAutonomousSystemNumber());
-													}
-												} catch (UnknownHostException e) {
-													//TODO
-												}catch (GeoIp2Exception e2) {
-													//TODO
-												}
-											}
-											if (outMap.containsKey(hostName)) {
-												double[] old = outMap.get(hostName);
-												old[0]++;
-												old[1] += ipNums;
-												old[2] += asn.size();
-												old[3] += country.size();
-												old[4] += queryTime;
-												old[5] += dnsPacket.length();
-											}
-											else {
-												outMap.put(hostName,new double[]{1,ipNums,
-														asn.size(),
-														country.size(),
-														queryTime,
-														dnsPacket.length()});
-											}
-										}
-									}
-								}
+//		HashMap<String, HashMap<String, Object>> map = mapper.readValue(responseEntity.getBody(), HashMap.class);
+//		System.out.println(map.get("tasks"));
+		//test http post
+		RestTemplate restTemplate = new RestTemplate();
+		String url = "http://10.3.200.130:8501/v1/models/cnn:predict";
+		String path = "src/main/resources/static/trojanImages/normal.png";
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+		HashMap<String, byte[]> map = new HashMap<String, byte[]>();
+		Test test = new Test();
+		HashMap<String, byte[]> byteMap = test.trojanPcapToPng();
+		Collection<byte[]> collection = byteMap.values();
+		byte[] image = null;
+		for (Iterator<byte[]> iterator = collection.iterator(); iterator.hasNext();) {
+			image = (byte[]) iterator.next();
+			break;
+		}
+		map.put("instances",image);
+		
+		HttpEntity<HashMap<String, byte[]>> request = new HttpEntity<HashMap<String,byte[]>>(map,headers);
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, request, String.class);
+		System.out.println(responseEntity.getBody());
+		ObjectMapper mapper = new ObjectMapper();
+		@SuppressWarnings("unchecked")
+		HashMap<String, ArrayList<HashMap<String, Object>>> result = mapper.readValue(responseEntity.getBody(), HashMap.class);
+		System.out.println(result.get("predictions"));
+		//test imageHandler
+//		String path = "src/main/resources/static/trojanImages/test.png";
+//		ImageHandler handler = new ImageHandler();
+//		System.out.println(handler.imageToDoubleArray(path).length);
+	}
+	private static final String PCAP_PATH = "src/main/resources/dataInput/dns/shell/20191024/test.pcap";
+	private static final int PACKET_SIZE = 784;
+	public HashMap<String, byte[]> trojanPcapToPng() throws PcapNativeException {
+		PcapHandle handle;
+		handle = Pcaps.openOffline(PCAP_PATH);
+		HashMap<String, ArrayList<byte[]>> fiveArrayMap = new HashMap<String, ArrayList<byte[]>>();
+		long start,end;
+		start = System.currentTimeMillis();
+		System.out.println(Thread.currentThread()+" "+PCAP_PATH+" begin");
+		while(true) {
+			try {
+				Packet packet = handle.getNextPacketEx();
+				if (packet.contains(IpPacket.class)) {
+					IpPacket ipPacket = packet.get(IpPacket.class);
+					IpHeader ipHeader = ipPacket.getHeader();
+					InetAddress srcAddress = ipHeader.getSrcAddr();
+					InetAddress desAddress = ipHeader.getDstAddr();
+					String srcFlow = null,desFlow = null,udpOrTcp = null;
+					byte[] payload = null;
+					if (ipPacket.contains(TcpPacket.class)) {
+						TcpPacket tcpPacket = ipPacket.get(TcpPacket.class);
+						TcpHeader tcpHeader = tcpPacket.getHeader();
+						TcpPort srcPort = tcpHeader.getSrcPort();
+						TcpPort desPort = tcpHeader.getDstPort();
+						srcFlow = srcAddress.getHostAddress()+"_"+srcPort.valueAsString();
+						desFlow = desAddress.getHostAddress()+"_"+desPort.valueAsString();
+						udpOrTcp = "TCP";
+						
+						payload = tcpPacket.getPayload() == null?null:tcpPacket.getPayload().getRawData();
+					}
+					else if (ipPacket.contains(UdpPacket.class)) {
+						UdpPacket udpPacket = ipPacket.get(UdpPacket.class);
+						UdpHeader udpHeader = udpPacket.getHeader();
+						UdpPort srcPort = udpHeader.getSrcPort();
+						UdpPort desPort = udpHeader.getDstPort();
+						srcFlow = srcAddress.getHostAddress()+"_"+srcPort.valueAsString();
+						desFlow = desAddress.getHostAddress()+"_"+desPort.valueAsString();
+						udpOrTcp = "UDP";
+						payload = udpPacket.getPayload() == null?null:udpPacket.getPayload().getRawData();
+					}
+					if (udpOrTcp != null && payload != null) {
+						if (!fiveArrayMap.containsKey(udpOrTcp+"_"+srcFlow+"_"+desFlow) && 
+								!fiveArrayMap.containsKey(udpOrTcp+"_"+desFlow+"_"+srcFlow)) {
+							ArrayList<byte[]> packets = new ArrayList<byte[]>();
+							packets.add(payload);
+							fiveArrayMap.put(udpOrTcp+"_"+srcFlow+"_"+desFlow, packets);
+						}
+						else {
+							String key = null;
+							if (fiveArrayMap.containsKey(udpOrTcp+"_"+srcFlow+"_"+desFlow)) {
+								key = udpOrTcp+"_"+srcFlow+"_"+desFlow;
+							}
+							else {
+								key = udpOrTcp+"_"+desFlow+"_"+srcFlow;
+							}
+							ArrayList<byte[]> getPackets = fiveArrayMap.get(key);
+							int size = 0;
+							boolean isSame = false;
+							for (int i = 0; i < getPackets.size() && size < PACKET_SIZE && !isSame; i++) {
+								size += getPackets.get(i).length;
+								isSame = Arrays.equals(payload, getPackets.get(i));
+							}
+							if (!isSame && size < PACKET_SIZE) {
+								getPackets.add(payload);
 							}
 						}
 					}
 				}
-			}
-	    } catch (TimeoutException e) {} 
-	      catch (EOFException e) {
+			} catch (TimeoutException e) {
+	      		System.out.println("Time out");
+	      		break;
+	      	} catch (NotOpenException e) {
+	      		System.out.println("Not open");
+	      		break;
+			} catch (EOFException e) {
 	      		System.out.println("EOF");
 	      		break;
-	      }
-	    }
-	    handle.close();
-		outMap.forEach((String name,double[] in)->{
-			String[] out = new String[6];
-			out[0] = name;
-			out[1] = String.valueOf(in[1]/in[0]);
-			out[2] = String.valueOf(in[2]/in[0]);
-			out[3] = String.valueOf(in[3]/in[0]);
-			out[4] = String.valueOf(in[4]/in[0]);
-			out[5] = String.valueOf(in[5]/in[0]);
-			try {
-				csvWriter.writeRecord(out);
-			} catch (IOException e) {
-				e.printStackTrace();
+	      	} catch (ArrayIndexOutOfBoundsException e) {
+				System.out.println("Array out of Bounds");
 			}
+		}
+		handle.close();
+		HashMap<String, byte[]> byteMap = trimToSize(fiveArrayMap);
+		fiveArrayMap.clear();
+		byteMap.forEach((k,v)->{
+			System.out.println(k);
 		});
-	    csvWriter.close();
+		end = System.currentTimeMillis();
+		System.out.println((end - start)+" "+PCAP_PATH+" end");
+		return byteMap;
+	}
+	private HashMap<String, byte[]> trimToSize(HashMap<String, ArrayList<byte[]>> in){
+		HashMap<String, byte[]> outHashMap = new HashMap<String, byte[]>();
+		Set<Entry<String, ArrayList<byte[]>>> set = in.entrySet();
+		set.forEach(s->{
+			int length = PACKET_SIZE;
+			byte[] out = new byte[PACKET_SIZE];
+			ArrayList<byte[]> arrayList = s.getValue();
+			for (int i = 0; i < arrayList.size() && length > 0; i++) {
+				byte[] bs = arrayList.get(i);
+				if (length >= bs.length) {
+					System.arraycopy(bs, 0, out, PACKET_SIZE-length, bs.length);
+					length -= arrayList.get(0).length;
+				}
+				else {
+					System.arraycopy(bs, 0, out, PACKET_SIZE-length, length);
+					length = 0;
+				}
+			}
+			outHashMap.put(s.getKey(), out);
+		});
+		return outHashMap;
 	}
 }
