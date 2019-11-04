@@ -34,7 +34,6 @@ public class InfoController {
 		respository.findByTimeGreaterThan(time).forEach(info->{
 			dataFormat.addData(new FlowNum(info.getFlowNum(),info.getTime()));
 		});
-//		respository.deleteAllInBatch();
 		return dataFormat;
 	}
 	@GetMapping("/info/packageNum")

@@ -55,7 +55,10 @@ public class ScheduledTask {
 						List<Info> newest = infoRespository.findFirst1ByTimeGreaterThan("0",
 								new Sort(Direction.DESC,"time"));
 						if (newest.size() != 0) {
-							System.out.println(newest.get(0).getTime());
+							System.out.println("newest time "+newest.get(0).getTime());
+						}
+						else {
+							System.out.println("info is empty");
 						}
 						if (newest.size() == 0 || Long.valueOf(newest.get(0).getTime()) < (dayDate.getTime() + 86400000)) {
 							File dirFile = new File(DNS_FILE_PATH+"/"+files[i].getName());

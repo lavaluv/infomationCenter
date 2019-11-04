@@ -1,6 +1,7 @@
 package bupt.hbq.spring.test;
 
 import java.io.EOFException;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +31,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.EqualsAndHashCode;
@@ -37,53 +40,70 @@ import lombok.ToString;
 
 @ToString @EqualsAndHashCode
 public class Test {
+	private static final int DETECT_PACKET_SIZE = 2000;
 	public static void main(String[] args)throws Exception{
-        // test jackson
-//		Info info = new Info();
-//		info.setTime(String.valueOf(System.currentTimeMillis()));
-//		ObjectMapper mapper = new ObjectMapper();
-//		String reString = mapper.writeValueAsString(info);
-//		System.out.println(reString);
-        //test http get
-//		RestTemplate restTemplate = new RestTemplate();
-//		ResponseEntity<String> responseEntity = restTemplate.getForEntity("http://127.0.0.1:5000/api/test", String.class);
-//		System.out.println(responseEntity.getBody());
-//		ObjectMapper mapper = new ObjectMapper();
-//		@SuppressWarnings("unchecked")
-//		HashMap<String, HashMap<String, Object>> map = mapper.readValue(responseEntity.getBody(), HashMap.class);
-//		System.out.println(map.get("tasks"));
 		//test http post
-		RestTemplate restTemplate = new RestTemplate();
-		String url = "http://10.3.200.130:8501/v1/models/cnn:predict";
 		String path = "src/main/resources/static/trojanImages/normal.png";
+		Test test = new Test();
+		HashMap<String, int[]> byteMap = test.trojanPcapToPng();
+		ArrayList<HashMap<String, Object>> resultAll = new ArrayList<HashMap<String,Object>>();
+		Set<Entry<String, int[]>> set = byteMap.entrySet();
+		ArrayList<int[]> in = new ArrayList<int[]>();
+		ArrayList<String> strings = new ArrayList<String>();
+		int index = 0;
+		for (Iterator<Entry<String, int[]>> iterator = set.iterator(); iterator.hasNext();index++) {
+			Entry<String, int[]> entry = iterator.next();
+			in.add(entry.getValue());
+			strings.add(entry.getKey());
+			if (index == DETECT_PACKET_SIZE) {
+				ArrayList<HashMap<String, Object>> resultArrayList = test.detectResult(in);
+				System.out.println(resultArrayList);
+				resultAll.addAll(resultArrayList);
+				in.clear();
+				index = 0;
+			}
+		}
+		if (in.size() != 0) {
+			ArrayList<HashMap<String, Object>> resultArrayList = test.detectResult(in);
+			System.out.println(resultArrayList);
+			resultAll.addAll(resultArrayList);
+		}
+		System.out.println(strings.size()+":"+resultAll.size());
+		strings.forEach(s->{
+			System.out.println(s);
+		});
+	}
+	private static final String URL = "http://10.3.200.130:8501/v1/models/cnn:predict";
+	@SuppressWarnings("unchecked")
+	private ArrayList<HashMap<String, Object>> detectResult(ArrayList<int[]> in){
+		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
-		HashMap<String, byte[]> map = new HashMap<String, byte[]>();
-		Test test = new Test();
-		HashMap<String, byte[]> byteMap = test.trojanPcapToPng();
-		Collection<byte[]> collection = byteMap.values();
-		byte[] image = null;
-		for (Iterator<byte[]> iterator = collection.iterator(); iterator.hasNext();) {
-			image = (byte[]) iterator.next();
-			break;
-		}
-		map.put("instances",image);
-		
-		HttpEntity<HashMap<String, byte[]>> request = new HttpEntity<HashMap<String,byte[]>>(map,headers);
-		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, request, String.class);
-		System.out.println(responseEntity.getBody());
+		HashMap<String, ArrayList<int[]>> map = new HashMap<String, ArrayList<int[]>>();
+		in.trimToSize();
+		map.put("instances",in);
+		HttpEntity<HashMap<String, ArrayList<int[]>>> request = new HttpEntity<HashMap<String,ArrayList<int[]>>>(map,headers);
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(URL, request, String.class);
 		ObjectMapper mapper = new ObjectMapper();
-		@SuppressWarnings("unchecked")
-		HashMap<String, ArrayList<HashMap<String, Object>>> result = mapper.readValue(responseEntity.getBody(), HashMap.class);
-		System.out.println(result.get("predictions"));
-		//test imageHandler
-//		String path = "src/main/resources/static/trojanImages/test.png";
-//		ImageHandler handler = new ImageHandler();
-//		System.out.println(handler.imageToDoubleArray(path).length);
+		HashMap<String, ArrayList<HashMap<String, Object>>> result;
+		try {
+			result = mapper.readValue(responseEntity.getBody(), HashMap.class);
+			return result.get("predictions");
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 	private static final String PCAP_PATH = "src/main/resources/dataInput/dns/shell/20191024/test.pcap";
 	private static final int PACKET_SIZE = 784;
-	public HashMap<String, byte[]> trojanPcapToPng() throws PcapNativeException {
+	public HashMap<String, int[]> trojanPcapToPng() throws PcapNativeException {
 		PcapHandle handle;
 		handle = Pcaps.openOffline(PCAP_PATH);
 		HashMap<String, ArrayList<byte[]>> fiveArrayMap = new HashMap<String, ArrayList<byte[]>>();
@@ -163,7 +183,7 @@ public class Test {
 			}
 		}
 		handle.close();
-		HashMap<String, byte[]> byteMap = trimToSize(fiveArrayMap);
+		HashMap<String, int[]> byteMap = trimToSize(fiveArrayMap);
 		fiveArrayMap.clear();
 		byteMap.forEach((k,v)->{
 			System.out.println(k);
@@ -172,21 +192,25 @@ public class Test {
 		System.out.println((end - start)+" "+PCAP_PATH+" end");
 		return byteMap;
 	}
-	private HashMap<String, byte[]> trimToSize(HashMap<String, ArrayList<byte[]>> in){
-		HashMap<String, byte[]> outHashMap = new HashMap<String, byte[]>();
+	private HashMap<String, int[]> trimToSize(HashMap<String, ArrayList<byte[]>> in){
+		HashMap<String, int[]> outHashMap = new HashMap<String, int[]>();
 		Set<Entry<String, ArrayList<byte[]>>> set = in.entrySet();
 		set.forEach(s->{
 			int length = PACKET_SIZE;
-			byte[] out = new byte[PACKET_SIZE];
+			int[] out = new int[PACKET_SIZE];
 			ArrayList<byte[]> arrayList = s.getValue();
 			for (int i = 0; i < arrayList.size() && length > 0; i++) {
 				byte[] bs = arrayList.get(i);
-				if (length >= bs.length) {
-					System.arraycopy(bs, 0, out, PACKET_SIZE-length, bs.length);
+				int[] intArray = new int[bs.length];
+				for (int j = 0; j < bs.length; j++) {
+					intArray[i] = bs[i];
+				}
+				if (length >= intArray.length) {
+					System.arraycopy(intArray, 0, out, PACKET_SIZE-length, intArray.length);
 					length -= arrayList.get(0).length;
 				}
 				else {
-					System.arraycopy(bs, 0, out, PACKET_SIZE-length, length);
+					System.arraycopy(intArray, 0, out, PACKET_SIZE-length, length);
 					length = 0;
 				}
 			}

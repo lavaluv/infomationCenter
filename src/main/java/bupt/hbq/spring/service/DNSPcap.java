@@ -56,8 +56,8 @@ public class DNSPcap {
 	public void register(Info info) {
 		applicationContext.publishEvent(new DnsPcapEvent(this, info));
 	}
-	public void registerDetection(String csvString) {
-		applicationContext.publishEvent(new HostDetectionEvent(this, csvString));
+	public void registerDetection(String csvString,Info info) {
+		applicationContext.publishEvent(new HostDetectionEvent(this, csvString,info));
 	}
 	public void pcapToCsv(File pcapFile,Info info){
 	    PcapHandle handle = null;
@@ -233,7 +233,7 @@ public class DNSPcap {
 				csvWriter.close();
 				info.setPackageNum(packetNum);
 				register(info);
-				registerDetection(outFileName);
+				registerDetection(outFileName,info);
 				end = System.currentTimeMillis();
 				System.out.println((end - start)+" "+pcapFile.getName()+" end");
 			}

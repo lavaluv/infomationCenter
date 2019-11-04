@@ -7,7 +7,7 @@ import java.io.File;
 import javax.imageio.ImageIO;
 
 public class ImageHandler {
-	public int[] imageToDoubleArray(String imagePath) {
+	public static int[] imageToDoubleArray(String imagePath) {
 		try {
 			BufferedImage image = ImageIO.read(new File(imagePath));
             Raster raster = image.getData();

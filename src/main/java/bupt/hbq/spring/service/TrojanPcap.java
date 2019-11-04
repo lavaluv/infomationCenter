@@ -4,13 +4,11 @@ import java.io.EOFException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.Test;
 import org.pcap4j.core.NotOpenException;
 import org.pcap4j.core.PcapHandle;
 import org.pcap4j.core.PcapNativeException;
@@ -24,14 +22,11 @@ import org.pcap4j.packet.UdpPacket;
 import org.pcap4j.packet.namednumber.TcpPort;
 import org.pcap4j.packet.namednumber.UdpPort;
 
-import lombok.val;
-
 import org.pcap4j.packet.IpPacket.IpHeader;
 
 public class TrojanPcap {
 	private static final String PCAP_PATH = "src/main/resources/dataInput/dns/shell/20191024/test.pcap";
 	private static final int PACKET_SIZE = 784;
-	@Test
 	public void trojanPcapToPng() throws PcapNativeException {
 		PcapHandle handle;
 		handle = Pcaps.openOffline(PCAP_PATH);
@@ -57,7 +52,6 @@ public class TrojanPcap {
 						srcFlow = srcAddress.getHostAddress()+"_"+srcPort.valueAsString();
 						desFlow = desAddress.getHostAddress()+"_"+desPort.valueAsString();
 						udpOrTcp = "TCP";
-						
 						payload = tcpPacket.getPayload() == null?null:tcpPacket.getPayload().getRawData();
 					}
 					else if (ipPacket.contains(UdpPacket.class)) {
@@ -112,29 +106,33 @@ public class TrojanPcap {
 			}
 		}
 		handle.close();
-		HashMap<String, byte[]> byteMap = trimToSize(fiveArrayMap);
+		HashMap<String, int[]> intMap = trimToSize(fiveArrayMap);
 		fiveArrayMap.clear();
-		byteMap.forEach((k,v)->{
-			System.out.println(k);
-		});
+//		intMap.forEach((k,v)->{
+//			System.out.println(k);
+//		});
 		end = System.currentTimeMillis();
 		System.out.println((end - start)+" "+PCAP_PATH+" end");
 	}
-	private HashMap<String, byte[]> trimToSize(HashMap<String, ArrayList<byte[]>> in){
-		HashMap<String, byte[]> outHashMap = new HashMap<String, byte[]>();
+	private HashMap<String, int[]> trimToSize(HashMap<String, ArrayList<byte[]>> in){
+		HashMap<String, int[]> outHashMap = new HashMap<String, int[]>();
 		Set<Entry<String, ArrayList<byte[]>>> set = in.entrySet();
 		set.forEach(s->{
 			int length = PACKET_SIZE;
-			byte[] out = new byte[PACKET_SIZE];
+			int[] out = new int[PACKET_SIZE];
 			ArrayList<byte[]> arrayList = s.getValue();
 			for (int i = 0; i < arrayList.size() && length > 0; i++) {
 				byte[] bs = arrayList.get(i);
-				if (length >= bs.length) {
-					System.arraycopy(bs, 0, out, PACKET_SIZE-length, bs.length);
+				int[] intArray = new int[bs.length];
+				for (int j = 0; j < bs.length; j++) {
+					intArray[i] = bs[i];
+				}
+				if (length >= intArray.length) {
+					System.arraycopy(intArray, 0, out, PACKET_SIZE-length, intArray.length);
 					length -= arrayList.get(0).length;
 				}
 				else {
-					System.arraycopy(bs, 0, out, PACKET_SIZE-length, length);
+					System.arraycopy(intArray, 0, out, PACKET_SIZE-length, length);
 					length = 0;
 				}
 			}

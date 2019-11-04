@@ -2,25 +2,55 @@ package bupt.hbq.spring.event;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Component;
 
+import bupt.hbq.spring.dao.DetectHistoryRepository;
+import bupt.hbq.spring.dao.DomainDetectResultRepository;
+import bupt.hbq.spring.objects.dns.DetectHistory;
+import bupt.hbq.spring.objects.dns.DomainDetectResult;
+import bupt.hbq.spring.objects.info.Info;
 import bupt.hbq.spring.service.DNSDetection;
 
 @Component
 public class HostDetectionEventListener {
 	private DNSDetection detection;
-	public HostDetectionEventListener(DNSDetection detection) {
+	private DetectHistoryRepository detectHistoryRepository;
+	private DomainDetectResultRepository domainDetectResultRepository;
+	public HostDetectionEventListener(DNSDetection detection,DomainDetectResultRepository domainDetectResultRepository,
+			DetectHistoryRepository detectHistoryRepository) {
 		this.detection = detection;
+		this.domainDetectResultRepository = domainDetectResultRepository;
+		this.detectHistoryRepository = detectHistoryRepository;
 	}
 	@EventListener
 	public void register(HostDetectionEvent hostDetectionEvent) {
 		try {
 			//wait csvWriter end writing
 			Thread.sleep(5000);
-			ArrayList<String> result = detection.modelPrediction(hostDetectionEvent.getCsvPath());
+			ArrayList<DomainDetectResult> result = detection.modelPrediction(hostDetectionEvent.getCsvPath());
+			Info info = hostDetectionEvent.getInfo();
+			DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHH");
+			try {
+				DetectHistory detectHistory = new DetectHistory(dateFormat.parse(info.getTime()), 1);
+				detectHistoryRepository.save(detectHistory);
+				result.forEach(r->{
+					r.setHistoryId(detectHistoryRepository.findFirst1ByHIdGreaterThan(0l, 
+							new Sort(Direction.DESC, "hId")).get(0).gethId());
+				});
+				System.out.println("DNS detection end");
+				domainDetectResultRepository.saveAll(result);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
