@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
-import bupt.hbq.spring.dao.UserRespository;
+import bupt.hbq.spring.dao.UserRepository;
 import bupt.hbq.spring.objects.User;
 
 @SpringBootApplication
@@ -15,7 +15,7 @@ public class Application {
 	}
 	
 	@Bean
-	ApplicationRunner init(UserRespository userRespository) {
+	ApplicationRunner init(UserRepository userRespository) {
 		return args -> {
 			User user = new User();
 			user.setName("admin");

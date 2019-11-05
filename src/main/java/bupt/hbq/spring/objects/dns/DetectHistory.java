@@ -21,24 +21,24 @@ public class DetectHistory {
 
     @Id @GeneratedValue
     private long hId;
-    private Date detectTime;
+    private String detectTime;
     private long userId;
     public DetectHistory(){
 
     }
-    public DetectHistory (Date detectTime) {
+    public DetectHistory (String detectTime) {
         this.detectTime = detectTime;
     }
-    public DetectHistory(Date detectTime,long userId){
+    public DetectHistory(String detectTime,long userId){
         this.detectTime =detectTime;
         this.userId =userId;
     }
 
-    public Date getDetectTime() {
+    public String getDetectTime() {
         return detectTime;
     }
 
-    public void setDetectTime(Date detectTime) {
+    public void setDetectTime(String detectTime) {
         this.detectTime = detectTime;
     }
 

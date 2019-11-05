@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import bupt.hbq.spring.dao.TrojanRespository;
+import bupt.hbq.spring.dao.TrojanRepository;
 import bupt.hbq.spring.objects.DataFormat;
 import bupt.hbq.spring.objects.Trojan;
 import bupt.hbq.spring.service.TrojanSerch;
 @RestController
 public class TrojanController {
-	private TrojanRespository trojanRespository;
-	public TrojanController(TrojanRespository trojanRespository) {
+	private TrojanRepository trojanRespository;
+	public TrojanController(TrojanRepository trojanRespository) {
 		this.trojanRespository = trojanRespository;
 	}
 	@GetMapping("/trojan")
@@ -33,19 +33,6 @@ public class TrojanController {
 			@RequestParam (value = "type",required = false)String type,
 			@RequestParam (value = "threatLevel",required = false)Integer threatLevel,
 			@RequestParam (value = "info",required = false)String info){
-		for(int i = 0;i < 30;i++) {
-			Trojan trojan = new Trojan();
-			trojan.setTime(String.valueOf(System.currentTimeMillis()-i*1000*180));
-			trojan.setSrcIP("127.0.0."+i);
-			trojan.setSrcPort(8080-i);
-			trojan.setDesIP("127.0.0."+i);
-			trojan.setDesPort(8080+i);
-			trojan.setProtocol("tcp"+String.valueOf(new Random().nextInt(3)));
-			trojan.setThreatLevel(new Random().nextInt(3));
-			trojan.setType(String.valueOf(new Random().nextInt(3)));
-			trojan.setInfo("test"+i);
-			trojanRespository.save(trojan);
-		}
 		if (toTime == null || toTime == "") {
 			toTime = String.valueOf(System.currentTimeMillis());
 		}
@@ -67,7 +54,6 @@ public class TrojanController {
 		DataFormat<Object> dataFormat = new DataFormat<Object>();
 		Page<Trojan> page2 = trojanRespository.findAll(TrojanSerch.queryTrojanListByTrojan(trojan,fromTime,toTime), PageRequest.of(page, size));
 		dataFormat.addData(page2);
-		trojanRespository.deleteAllInBatch();
 		return dataFormat;
 	}
 }

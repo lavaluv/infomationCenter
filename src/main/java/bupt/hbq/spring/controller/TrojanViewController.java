@@ -8,14 +8,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import bupt.hbq.spring.dao.TrojanViewRespository;
+import bupt.hbq.spring.dao.TrojanViewRepository;
 import bupt.hbq.spring.objects.DataFormat;
 import bupt.hbq.spring.objects.TrojanView;
 
 @RestController
 public class TrojanViewController {
-	private TrojanViewRespository trojanViewRespository;
-	public TrojanViewController(TrojanViewRespository trojanViewRespository) {
+	private TrojanViewRepository trojanViewRespository;
+	public TrojanViewController(TrojanViewRepository trojanViewRespository) {
 		this.trojanViewRespository = trojanViewRespository;
 	}
 	@GetMapping("/trojan/view/flow")

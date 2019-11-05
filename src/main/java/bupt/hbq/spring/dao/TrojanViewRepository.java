@@ -10,6 +10,6 @@ import bupt.hbq.spring.objects.TrojanView;
 
 @RepositoryRestResource
 @CrossOrigin(origins = "http://localhost:4200")
-public interface TrojanViewRespository extends JpaRepository<TrojanView, Long>{
+public interface TrojanViewRepository extends JpaRepository<TrojanView, Long>{
 	List<TrojanView> findByTimeGreaterThan(String time);
 }

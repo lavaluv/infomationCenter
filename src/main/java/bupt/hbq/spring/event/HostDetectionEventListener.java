@@ -16,6 +16,7 @@ import bupt.hbq.spring.dao.DetectHistoryRepository;
 import bupt.hbq.spring.dao.DomainDetectResultRepository;
 import bupt.hbq.spring.objects.dns.DetectHistory;
 import bupt.hbq.spring.objects.dns.DomainDetectResult;
+import bupt.hbq.spring.objects.info.DnsInfo;
 import bupt.hbq.spring.objects.info.Info;
 import bupt.hbq.spring.service.DNSDetection;
 
@@ -36,21 +37,15 @@ public class HostDetectionEventListener {
 			//wait csvWriter end writing
 			Thread.sleep(5000);
 			ArrayList<DomainDetectResult> result = detection.modelPrediction(hostDetectionEvent.getCsvPath());
-			Info info = hostDetectionEvent.getInfo();
-			DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHH");
-			try {
-				DetectHistory detectHistory = new DetectHistory(dateFormat.parse(info.getTime()), 1);
-				detectHistoryRepository.save(detectHistory);
-				result.forEach(r->{
-					r.setHistoryId(detectHistoryRepository.findFirst1ByHIdGreaterThan(0l, 
-							new Sort(Direction.DESC, "hId")).get(0).gethId());
-				});
-				System.out.println("DNS detection end");
-				domainDetectResultRepository.saveAll(result);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			DnsInfo dnsInfo = hostDetectionEvent.getDnsInfo();
+			DetectHistory detectHistory = new DetectHistory(dnsInfo.getTime(), 1);
+			detectHistoryRepository.save(detectHistory);
+			result.forEach(r->{
+				r.setHistoryId(detectHistoryRepository.findFirst1ByHIdGreaterThan(0l, 
+						new Sort(Direction.DESC, "hId")).get(0).gethId());
+			});
+			System.out.println("DNS detection end");
+			domainDetectResultRepository.saveAll(result);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

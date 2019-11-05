@@ -69,9 +69,11 @@ public class Test {
 			resultAll.addAll(resultArrayList);
 		}
 		System.out.println(strings.size()+":"+resultAll.size());
-		strings.forEach(s->{
-			System.out.println(s);
-		});
+		String[] resultStrings = new String[5];
+		for (int i = 0; i < strings.size(); i++) {
+			resultStrings = strings.get(i).split("_");
+			System.out.println(resultStrings[0]+"_"+resultStrings[1]+"_"+resultStrings[2]+"_"+resultStrings[3]+"_"+resultStrings[4]);
+		}
 	}
 	private static final String URL = "http://10.3.200.130:8501/v1/models/cnn:predict";
 	@SuppressWarnings("unchecked")

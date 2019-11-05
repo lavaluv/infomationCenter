@@ -24,26 +24,26 @@ public class DomainDectCotroller {
         this.domainDetectResultRepository =domainDetectResultRepository;
         this.detectHistoryRepository = detectHistoryRepository;
     }
-    @GetMapping("/dectDns")
-    @CrossOrigin(origins = "http://localhost:4200")
-    public ArrayList<DomainDetectResult> domainDect(@RequestParam(value = "filepath",required = false)String detectFilePath,
-                                                   @RequestParam(value = "uid",required = true) long userid){
-
-        ArrayList<DomainDetectResult> result = null;
-
-        DetectHistory detectHistory = new DetectHistory(new Date(),userid);
-        detectHistoryRepository.save(detectHistory);
-        try{
-            //result =ModelCalc.modelPrediction("c:\\DecisionTreeIris.pmml","c:\\data_View.txt");
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        for(int i =0;i<result.size();i++){
-            result.get(i).setHistoryId(detectHistory.gethId());
-        }
-        domainDetectResultRepository.saveAll(result);
-        return result;
-    }
+//    @GetMapping("/dectDns")
+//    @CrossOrigin(origins = "http://localhost:4200")
+//    public ArrayList<DomainDetectResult> domainDect(@RequestParam(value = "filepath",required = false)String detectFilePath,
+//                                                   @RequestParam(value = "uid",required = true) long userid){
+//
+//        ArrayList<DomainDetectResult> result = null;
+//
+//        DetectHistory detectHistory = new DetectHistory(new Date(),userid);
+//        detectHistoryRepository.save(detectHistory);
+//        try{
+//            //result =ModelCalc.modelPrediction("c:\\DecisionTreeIris.pmml","c:\\data_View.txt");
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
+//        for(int i =0;i<result.size();i++){
+//            result.get(i).setHistoryId(detectHistory.gethId());
+//        }
+//        domainDetectResultRepository.saveAll(result);
+//        return result;
+//    }
     @GetMapping("/history")
     @CrossOrigin(origins = "http://localhost:4200")
     public List<DetectHistory> getAllDetectHistory(@RequestParam(value = "userId",required = false)long userId){

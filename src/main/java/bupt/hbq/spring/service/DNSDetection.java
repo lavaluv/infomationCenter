@@ -17,8 +17,8 @@ import org.springframework.stereotype.Service;
 import bupt.hbq.spring.objects.dns.DomainDetectResult;
 @Service
 public class DNSDetection {
-	//private static final String PMML_PATH = "dataInput/dns/pmml/DecisionTreeIris.pmml";
-	private static final String PMML_PATH = "/home/user1/hbq/informationCenter/dataInput/dns/pmml/DecisionTreeIris.pmml";
+	private static final String PMML_PATH = "dataInput/dns/pmml/DecisionTreeIris.pmml";
+	//private static final String PMML_PATH = "/home/user1/hbq/informationCenter/dataInput/dns/pmml/DecisionTreeIris.pmml";
     public  ArrayList<DomainDetectResult> modelPrediction (String modelArgsFilePath) throws IOException{
         ModelInvoker invoker = new ModelInvoker(PMML_PATH);
         List<Map<FieldName, Object>> paramList = readInParams(modelArgsFilePath);

@@ -2,6 +2,7 @@ package bupt.hbq.spring.event;
 
 import org.springframework.context.ApplicationEvent;
 
+import bupt.hbq.spring.objects.info.DnsInfo;
 import bupt.hbq.spring.objects.info.Info;
 
 public class HostDetectionEvent extends ApplicationEvent{
@@ -10,11 +11,11 @@ public class HostDetectionEvent extends ApplicationEvent{
 	 */
 	private static final long serialVersionUID = -8712202535095621541L;
 	private String CsvPath;
-	private Info info;
-	public HostDetectionEvent(Object source,String csvString,Info info) {
+	private DnsInfo dnsInfo;
+	public HostDetectionEvent(Object source,String csvString,DnsInfo dnsInfo) {
 		super(source);
 		this.CsvPath = csvString;
-		this.info = info;
+		this.dnsInfo = dnsInfo;
 	}
 	public String getCsvPath() {
 		return CsvPath;
@@ -22,11 +23,11 @@ public class HostDetectionEvent extends ApplicationEvent{
 	public void setCsvPath(String csvPath) {
 		CsvPath = csvPath;
 	}
-	public Info getInfo() {
-		return info;
+	public DnsInfo getDnsInfo() {
+		return dnsInfo;
 	}
-	public void setInfo(Info info) {
-		this.info = info;
+	public void setDnsInfo(DnsInfo dnsInfo) {
+		this.dnsInfo = dnsInfo;
 	}
 	
 }

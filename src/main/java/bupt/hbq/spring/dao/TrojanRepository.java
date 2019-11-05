@@ -11,7 +11,7 @@ import bupt.hbq.spring.objects.Trojan;
 
 @RepositoryRestResource
 @CrossOrigin(origins = "http://localhost:4200")
-public interface TrojanRespository extends JpaRepository<Trojan, Long>,JpaSpecificationExecutor<Trojan>{
+public interface TrojanRepository extends JpaRepository<Trojan, Long>,JpaSpecificationExecutor<Trojan>{
 	Page<Trojan> findByTimeGreaterThan(String time,Pageable pageable);
 	Page<Trojan> findByTimeGreaterThanAndSrcIP(String time,String srcIP,Pageable pageable);
 	Page<Trojan> findByTimeGreaterThanAndDesIP(String time,String desIP,Pageable pageable);

@@ -44,6 +44,7 @@ import com.maxmind.geoip2.model.CountryResponse;
 
 import bupt.hbq.spring.event.DnsPcapEvent;
 import bupt.hbq.spring.event.HostDetectionEvent;
+import bupt.hbq.spring.objects.info.DnsInfo;
 import bupt.hbq.spring.objects.info.Info;
 @Service
 public class DNSPcap {
@@ -53,13 +54,13 @@ public class DNSPcap {
 	private static final String ASN_DATABASE = "dataInput/dns/geoIP/GeoLite2-ASN.mmdb";
 	@Autowired
 	private ApplicationContext applicationContext;
-	public void register(Info info) {
-		applicationContext.publishEvent(new DnsPcapEvent(this, info));
+	public void register(DnsInfo dnsInfo) {
+		applicationContext.publishEvent(new DnsPcapEvent(this, dnsInfo));
 	}
-	public void registerDetection(String csvString,Info info) {
-		applicationContext.publishEvent(new HostDetectionEvent(this, csvString,info));
+	public void registerDetection(String csvString,DnsInfo dnsInfo) {
+		applicationContext.publishEvent(new HostDetectionEvent(this, csvString,dnsInfo));
 	}
-	public void pcapToCsv(File pcapFile,Info info){
+	public void pcapToCsv(File pcapFile,DnsInfo dnsInfo){
 	    PcapHandle handle = null;
 	    try {
 			handle = Pcaps.openOffline(pcapFile.getPath());
@@ -231,9 +232,9 @@ public class DNSPcap {
 				});
 			} finally {
 				csvWriter.close();
-				info.setPackageNum(packetNum);
-				register(info);
-				registerDetection(outFileName,info);
+				dnsInfo.setPackageNum(packetNum);
+				register(dnsInfo);
+				registerDetection(outFileName,dnsInfo);
 				end = System.currentTimeMillis();
 				System.out.println((end - start)+" "+pcapFile.getName()+" end");
 			}

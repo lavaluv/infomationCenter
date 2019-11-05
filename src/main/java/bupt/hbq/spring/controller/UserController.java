@@ -6,15 +6,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import bupt.hbq.spring.dao.UserRespository;
+import bupt.hbq.spring.dao.UserRepository;
 import bupt.hbq.spring.objects.DataFormat;
 import bupt.hbq.spring.objects.RespondValue;
 import bupt.hbq.spring.objects.User;
 
 @RestController
 public class UserController {
-	private UserRespository userRespository;
-	public UserController(UserRespository userRespository) {
+	private UserRepository userRespository;
+	public UserController(UserRepository userRespository) {
 		this.userRespository = userRespository;
 	}
 	@RequestMapping(value = "/login",produces = {"application/json;charset=UTF-8"},method = RequestMethod.POST)
