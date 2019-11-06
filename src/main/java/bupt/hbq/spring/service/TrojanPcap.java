@@ -28,6 +28,8 @@ import org.springframework.stereotype.Service;
 
 import bupt.hbq.spring.event.TrojanDetectionEvent;
 import bupt.hbq.spring.event.TrojanPcapEvent;
+import bupt.hbq.spring.event.TrojanViewEvent;
+import bupt.hbq.spring.objects.TrojanView;
 import bupt.hbq.spring.objects.info.Info;
 import bupt.hbq.spring.objects.info.TrojanInfo;
 

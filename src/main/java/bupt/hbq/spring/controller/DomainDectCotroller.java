@@ -1,5 +1,7 @@
 package bupt.hbq.spring.controller;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -7,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import bupt.hbq.spring.dao.DetectHistoryRepository;
 import bupt.hbq.spring.dao.DomainDetectResultRepository;
+import bupt.hbq.spring.objects.DataFormat;
 import bupt.hbq.spring.objects.dns.DetectHistory;
 import bupt.hbq.spring.objects.dns.DomainDetectResult;
 
@@ -46,15 +49,23 @@ public class DomainDectCotroller {
 //    }
     @GetMapping("/history")
     @CrossOrigin(origins = "http://localhost:4200")
-    public List<DetectHistory> getAllDetectHistory(@RequestParam(value = "userId",required = false)long userId){
-            List<DetectHistory> historyList =detectHistoryRepository.findDetectHistoriesByUserId(userId);
-            return historyList;
+    public DataFormat<Object> getAllDetectHistory(@RequestParam(value = "userId",required = true)long userId,
+    		@RequestParam(value = "page",required = true)int page,
+    		@RequestParam(value = "size",required = true)int size){
+            DataFormat<Object> dataFormat = new DataFormat<Object>();
+            Page<DetectHistory> detectPage = detectHistoryRepository.findByUserId(userId,PageRequest.of(page, size));
+            dataFormat.addData(detectPage);
+            return dataFormat;
     }
     @GetMapping("/detail")
     @CrossOrigin(origins = "http://localhost:4200")
-    public List<DomainDetectResult> getDetectHistoryDetail(@RequestParam(value = "hId",required = true)long hId){
-        List<DomainDetectResult> resultlist =domainDetectResultRepository.findDomainDetectResultsByHistoryId(hId);
-        return resultlist;
+    public DataFormat<Object> getDetectHistoryDetail(@RequestParam(value = "hId",required = true)long hId,
+    		@RequestParam(value = "page",required = true)int page,
+    		@RequestParam(value = "size",required = true)int size){
+        DataFormat<Object> dataFormat = new DataFormat<Object>();
+        Page<DomainDetectResult> domainPage = domainDetectResultRepository.findByHistoryId(hId, PageRequest.of(page, size));
+        dataFormat.addData(domainPage);
+        return dataFormat;
     }
 
 }

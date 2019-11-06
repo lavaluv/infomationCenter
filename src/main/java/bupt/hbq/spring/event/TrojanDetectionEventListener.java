@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.Map.Entry;
 
 import org.springframework.context.event.EventListener;
@@ -19,8 +21,11 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import bupt.hbq.spring.dao.InfoRepository;
 import bupt.hbq.spring.dao.TrojanRepository;
+import bupt.hbq.spring.dao.TrojanViewRepository;
 import bupt.hbq.spring.objects.Trojan;
+import bupt.hbq.spring.objects.TrojanView;
 import bupt.hbq.spring.objects.info.Info;
 
 @Component
@@ -28,8 +33,13 @@ public class TrojanDetectionEventListener {
 	private static final int DETECT_PACKET_SIZE = 2000;
 	private static final String URL = "http://10.3.200.130:8501/v1/models/cnn:predict";
 	private TrojanRepository trojanRespository;
-	public TrojanDetectionEventListener(TrojanRepository trojanRespository) {
+	private TrojanViewRepository trojanViewRepository;
+	private InfoRepository infoRepository;
+	public TrojanDetectionEventListener(TrojanRepository trojanRespository,TrojanViewRepository trojanViewRepository,
+			InfoRepository infoRepository) {
 		this.trojanRespository = trojanRespository;
+		this.trojanViewRepository = trojanViewRepository;
+		this.infoRepository = infoRepository;
 	}
 	@EventListener
 	public void register(TrojanDetectionEvent trojanDetectionEvent) {
@@ -39,6 +49,7 @@ public class TrojanDetectionEventListener {
 		ArrayList<int[]> in = new ArrayList<int[]>();
 		ArrayList<String> strings = new ArrayList<String>();
 		ArrayList<Trojan> trojans = new ArrayList<Trojan>();
+		TreeMap<String, Integer> viewMap = new TreeMap<String, Integer>();
 		int index = 0;
 		for (Iterator<Entry<String, int[]>> iterator = set.iterator(); iterator.hasNext();index++) {
 			Entry<String, int[]> entry = iterator.next();
@@ -72,9 +83,29 @@ public class TrojanDetectionEventListener {
 				String pro = String.valueOf(arrayList.get(1));
 				trojan.setThreatLevel(pro.charAt(0) == '1'?5:Integer.valueOf(pro.substring(2, 3))-5);
 				trojans.add(trojan);
+				if (viewMap.containsKey(trojan.getProtocol())) {
+					viewMap.put(trojan.getProtocol(), viewMap.get(trojan.getProtocol())+784);
+				}
+				else {
+					viewMap.put(trojan.getProtocol(), 784);
+				}
 			}
 		}
 		trojanRespository.saveAll(trojans);
+		TrojanView trojanView = new TrojanView();
+		trojanView.setTime(trojanDetectionEvent.getTrojanInfo().getTime());
+		ArrayList<String> protocoList = new ArrayList<String>();
+		protocoList.addAll(viewMap.keySet());
+		trojanView.setProtocol(protocoList);
+		ArrayList<Integer> sizeList = new ArrayList<Integer>();
+		sizeList.addAll(viewMap.values());
+		trojanView.setSize(sizeList);
+		trojanViewRepository.save(trojanView);
+		List<Info> infos = infoRepository.findByTime(trojanDetectionEvent.getTrojanInfo().getTime());
+		if (infos.size() != 0) {
+			infoRepository.updateThreatNumAndNotHandleNumByTime(infos.get(0).getThreatNum()+trojans.size(),
+					infos.get(0).getNotHandleNum()+1, infos.get(0).getTime());
+		}
 		System.out.println("Trojan detection end");
 	}
 	@SuppressWarnings("unchecked")

@@ -6,6 +6,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Sort;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import bupt.hbq.spring.dao.DetectHistoryRepository;
 import bupt.hbq.spring.dao.DomainDetectResultRepository;
+import bupt.hbq.spring.dao.InfoRepository;
 import bupt.hbq.spring.objects.dns.DetectHistory;
 import bupt.hbq.spring.objects.dns.DomainDetectResult;
 import bupt.hbq.spring.objects.info.DnsInfo;
@@ -25,11 +27,13 @@ public class HostDetectionEventListener {
 	private DNSDetection detection;
 	private DetectHistoryRepository detectHistoryRepository;
 	private DomainDetectResultRepository domainDetectResultRepository;
+	private InfoRepository infoRepository;
 	public HostDetectionEventListener(DNSDetection detection,DomainDetectResultRepository domainDetectResultRepository,
-			DetectHistoryRepository detectHistoryRepository) {
+			DetectHistoryRepository detectHistoryRepository,InfoRepository infoRepository) {
 		this.detection = detection;
 		this.domainDetectResultRepository = domainDetectResultRepository;
 		this.detectHistoryRepository = detectHistoryRepository;
+		this.infoRepository = infoRepository;
 	}
 	@EventListener
 	public void register(HostDetectionEvent hostDetectionEvent) {
@@ -45,6 +49,11 @@ public class HostDetectionEventListener {
 						new Sort(Direction.DESC, "hId")).get(0).gethId());
 			});
 			System.out.println("DNS detection end");
+			List<Info> info = infoRepository.findByTime(hostDetectionEvent.getDnsInfo().getTime());
+			if (info.size() != 0) {
+				infoRepository.updateThreatNumAndNotHandleNumByTime(info.get(0).getThreatNum()+result.size(),
+						info.get(0).getNotHandleNum()+1, info.get(0).getTime());
+			}
 			domainDetectResultRepository.saveAll(result);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block

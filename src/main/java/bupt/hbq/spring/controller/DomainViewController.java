@@ -2,7 +2,10 @@ package bupt.hbq.spring.controller;
 
 import com.maxmind.geoip2.DatabaseReader;
 
+import bupt.hbq.spring.dao.DetectHistoryRepository;
 import bupt.hbq.spring.dao.DomainDetectResultRepository;
+import bupt.hbq.spring.objects.DataFormat;
+import bupt.hbq.spring.objects.dns.DetectHistory;
 import bupt.hbq.spring.objects.dns.DomainDetectResult;
 import bupt.hbq.spring.objects.dns.DomainThreadView;
 import bupt.hbq.spring.objects.dns.IpCountView;
@@ -15,6 +18,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,17 +28,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class DomainViewController {
     private DomainDetectResultRepository domainDetectResultRepository;
-
-    public DomainViewController(DomainDetectResultRepository domainDetectResultRepository){
+    private DetectHistoryRepository detectHistoryRepository;
+    public DomainViewController(DomainDetectResultRepository domainDetectResultRepository,DetectHistoryRepository detectHistoryRepository){
         this.domainDetectResultRepository = domainDetectResultRepository;
+        this.detectHistoryRepository =detectHistoryRepository;
     }
     @GetMapping("/ipcount")
     @CrossOrigin(origins = "http://localhost:4200")
-    public List<IpCountView> getIpCountView(@RequestParam(value = "resultId",required = true)long resultId,
-                                            @RequestParam(value = "n",required = true)int n){
-        List<IpCountView> viewList = new ArrayList<IpCountView>();
-        List<DomainDetectResult> ddrlist =domainDetectResultRepository.findDomainDetectResultsByHistoryId(resultId);
-        return getIpCountViewList(ddrlist,n);
+    public DataFormat<Object> getIpCountView(@RequestParam(value = "n",required = true)int n){
+    	List<DetectHistory> histories = detectHistoryRepository.findFirst1ByDetectTimeGreaterThan(
+    			"0", new Sort(Direction.DESC, "detectTime"));
+        List<DomainDetectResult> ddrlist =domainDetectResultRepository.findDomainDetectResultsByHistoryId(
+        		histories.size()==0?-1:histories.get(0).gethId());
+        DataFormat<Object> dataFormat = new DataFormat<Object>();
+        getIpCountViewList(ddrlist,n).forEach(data->{
+        	dataFormat.addData(data);
+        });
+        return dataFormat;
     }
     public List<IpCountView> getIpCountViewList(List<DomainDetectResult> list,int n){
         List<IpCountView> viewsList = new ArrayList<IpCountView>();
@@ -108,12 +119,17 @@ public class DomainViewController {
     }
     @GetMapping("/idanger")
     @CrossOrigin(origins = "http://localhost:4200")
-    public List<DomainThreadView> getDomainThreadView(@RequestParam(value = "resultId") long resultId){
-        List<DomainThreadView> viewsList = new ArrayList<>();
-        List<DomainDetectResult> ddrlist = domainDetectResultRepository.findDomainDetectResultsByHistoryId(resultId);
+    public DataFormat<Object> getDomainThreadView(){
+    	List<DetectHistory> histories = detectHistoryRepository.findFirst1ByDetectTimeGreaterThan(
+    			"0", new Sort(Direction.DESC, "detectTime"));
+        List<DomainDetectResult> ddrlist = domainDetectResultRepository.findDomainDetectResultsByHistoryId(
+        		histories.size()==0?-1:histories.get(0).gethId());
+        DataFormat<Object> dataFormat = new DataFormat<Object>();
+        getDomainThreadViewList(ddrlist).forEach(data->{
+        	dataFormat.addData(data);
+        });
 
-
-        return getDomainThreadViewList(ddrlist);
+        return dataFormat;
     }
     public List<MapView> getMapViewList(List<DomainDetectResult> ddrist){
         List<MapView> mapViewList = new ArrayList<>();
@@ -126,19 +142,18 @@ public class DomainViewController {
                 MapView mv = new MapView(iplist[j],city);
                 mapViewList.add(mv);
             }
-
-
         }
         return mapViewList;
-
     }
     @GetMapping("/ipaddress")
     @CrossOrigin(origins = "http://localhost:4200")
-    public List<MapView> getMapView(@RequestParam(value = "resultId") long resultId){
-        List<MapView> viewList = new ArrayList<>();
+    public DataFormat<Object> getMapView(@RequestParam(value = "resultId") long resultId){
         List<DomainDetectResult> ddrlist = domainDetectResultRepository.findDomainDetectResultsByHistoryId(resultId);
-
-        return getMapViewList(ddrlist);
+        DataFormat<Object> dataFormat = new DataFormat<Object>();
+        getMapViewList(ddrlist).forEach(data->{
+        	dataFormat.addData(data);
+        });
+        return dataFormat;
 
     }
 }

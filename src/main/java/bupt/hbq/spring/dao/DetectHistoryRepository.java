@@ -1,5 +1,7 @@
 package bupt.hbq.spring.dao;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
@@ -15,4 +17,6 @@ public interface DetectHistoryRepository extends JpaRepository<DetectHistory, Lo
 
     List<DetectHistory> findDetectHistoriesByUserId(long userid);
     List<DetectHistory> findFirst1ByHIdGreaterThan(Long hid,Sort sort);
+    Page<DetectHistory> findByUserId(long userId,Pageable pageable);
+    List<DetectHistory> findFirst1ByDetectTimeGreaterThan(String detectTime,Sort sort);
 }
