@@ -178,11 +178,13 @@ public class DNSPcap {
 														}
 														if (cityResponse.getCity().getName()!=null) {
 															if (city.containsKey(hostName)) {
-																city.get(hostName).add(cityResponse.getCity().getName());
+																city.get(hostName).add(cityResponse.getCity().getNames().get("zh-CN") == null?
+																		cityResponse.getCity().getName():cityResponse.getCity().getNames().get("zh-CN"));
 															}
 															else {
 																HashSet<String> set = new HashSet<String>();
-																set.add(cityResponse.getCity().getName());
+																set.add(cityResponse.getCity().getNames().get("zh-CN") == null?
+																		cityResponse.getCity().getName():cityResponse.getCity().getNames().get("zh-CN"));
 																city.put(hostName,set);
 															}
 														}
@@ -235,19 +237,20 @@ public class DNSPcap {
 		    try {
 		    	System.out.println(pcapFile.getName()+" write");
 				outMap.forEach((String name,double[] in)->{
-					String[] out = new String[6];
+					String[] out = new String[7];
 					out[0] = name;
 					out[1] = String.valueOf(in[1]/in[0]);
 					out[2] = String.valueOf(in[2]/in[0]);
 					out[3] = String.valueOf(in[3]/in[0]);
 					out[4] = String.valueOf(in[4]/in[0]);
 					out[5] = String.valueOf(in[5]/in[0]);
+					out[6] = String.valueOf(in[0]);
 					HashSet<String> ipSet = ipMap.get(name);
 					String[] ipStrings = new String[ipSet.size()];
 					ipSet.toArray(ipStrings);
-					String [] result = new String[6+ipSet.size()];
-					System.arraycopy(out, 0, result, 0, 6);
-					System.arraycopy(ipStrings, 0, result, 6, ipSet.size());
+					String [] result = new String[7+ipSet.size()];
+					System.arraycopy(out, 0, result, 0, 7);
+					System.arraycopy(ipStrings, 0, result, 7, ipSet.size());
 					try {
 						csvWriter.writeRecord(result);
 						csvWriter.flush();

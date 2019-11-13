@@ -17,7 +17,7 @@ public class DomainDetectResult {
     private String Domain;
     @Column(columnDefinition = "text")
     private String ip;
-    private float countnumber;
+    private int countnumber;
     private float asnNumber;
     private float countryNumber;
     private float aRecordNumber;
@@ -28,7 +28,7 @@ public class DomainDetectResult {
     public DomainDetectResult(){
 
     }
-    public DomainDetectResult(String Domain,String ip,Float countnumber){
+    public DomainDetectResult(String Domain,String ip,int countnumber){
         this.Domain = Domain;
         this.ip = ip;
         this.countnumber = countnumber;
@@ -116,7 +116,7 @@ public class DomainDetectResult {
         this.historyId = historyId;
     }
 
-    public float getCountnumber() {
+    public int getCountnumber() {
         return countnumber;
     }
 
@@ -136,7 +136,7 @@ public class DomainDetectResult {
         this.ip = ip;
     }
 
-    public void setCountnumber(Float countnumber) {
+    public void setCountnumber(int countnumber) {
         this.countnumber = countnumber;
     }
 }

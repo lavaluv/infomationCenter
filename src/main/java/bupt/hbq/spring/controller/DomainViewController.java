@@ -1,11 +1,13 @@
 package bupt.hbq.spring.controller;
 
 import com.maxmind.geoip2.DatabaseReader;
+import com.sun.org.apache.bcel.internal.generic.NEW;
 
 import bupt.hbq.spring.dao.DetectHistoryRepository;
 import bupt.hbq.spring.dao.DomainDetectResultRepository;
 import bupt.hbq.spring.objects.DataFormat;
 import bupt.hbq.spring.objects.dns.DetectHistory;
+import bupt.hbq.spring.objects.dns.DomainCountView;
 import bupt.hbq.spring.objects.dns.DomainDetectResult;
 import bupt.hbq.spring.objects.dns.HistoryRecordView;
 import bupt.hbq.spring.objects.dns.IpCountView;
@@ -19,6 +21,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -152,7 +155,17 @@ public class DomainViewController {
             hrlist.add(new HistoryRecordView(""+datelist[i],l[i]));
         }
         return hrlist;
+    }
+    @GetMapping("/countAllDomain")
+    @CrossOrigin(origins = "http://localhost:4200")
+    public DataFormat<Object> countAllDomain(@RequestParam(value = "n",required = true) int n){
+        List<DomainDetectResult> ddr =domainDetectResultRepository.queryTopByCountnumber(PageRequest.of(0, n)).getContent();
+        DataFormat<Object> dataFormat = new DataFormat<>();
+        for(int i =0;i<n;i++){
 
+            dataFormat.addData(new DomainCountView(ddr.get(i).getCountnumber(),ddr.get(i).getDomain()));
+        }
+        return dataFormat;
     }
 }
 
