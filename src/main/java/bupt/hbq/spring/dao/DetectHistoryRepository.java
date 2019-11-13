@@ -19,4 +19,5 @@ public interface DetectHistoryRepository extends JpaRepository<DetectHistory, Lo
     List<DetectHistory> findFirst1ByHIdGreaterThan(Long hid,Sort sort);
     Page<DetectHistory> findByUserId(long userId,Pageable pageable);
     List<DetectHistory> findFirst1ByDetectTimeGreaterThan(String detectTime,Sort sort);
+    List<DetectHistory> findDetectHistoriesByDetectTimeBetween(String startTime,String endTime);
 }

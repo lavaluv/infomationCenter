@@ -4,7 +4,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import bupt.hbq.spring.dao.TrojanViewRepository;
-import bupt.hbq.spring.objects.TrojanView;
+import bupt.hbq.spring.objects.trojan.TrojanView;
 
 @Component
 public class TrojanViewEventListener {

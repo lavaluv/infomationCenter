@@ -3,7 +3,6 @@ package bupt.hbq.spring.event;
 import org.springframework.context.ApplicationEvent;
 
 import bupt.hbq.spring.objects.info.DnsInfo;
-import bupt.hbq.spring.objects.info.Info;
 
 public class DnsPcapEvent extends ApplicationEvent{
 	/**

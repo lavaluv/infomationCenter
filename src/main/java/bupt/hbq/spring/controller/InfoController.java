@@ -1,31 +1,48 @@
 package bupt.hbq.spring.controller;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
+import java.util.TreeMap;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import bupt.hbq.spring.dao.DetectHistoryRepository;
+import bupt.hbq.spring.dao.DomainDetectResultRepository;
 import bupt.hbq.spring.dao.InfoRepository;
 import bupt.hbq.spring.dao.TrojanRepository;
 import bupt.hbq.spring.objects.DataFormat;
-import bupt.hbq.spring.objects.Trojan;
+import bupt.hbq.spring.objects.dns.DetectHistory;
+import bupt.hbq.spring.objects.dns.DomainDetectResult;
+import bupt.hbq.spring.objects.dns.IpCountView;
 import bupt.hbq.spring.objects.info.FlowNum;
 import bupt.hbq.spring.objects.info.Info;
 import bupt.hbq.spring.objects.info.PackageNum;
+import bupt.hbq.spring.objects.info.ThreatLevel;
+import bupt.hbq.spring.objects.info.ThreatLevelNum;
 import bupt.hbq.spring.objects.info.ThreatNum;
+import bupt.hbq.spring.objects.trojan.Trojan;
 
 @RestController
 public class InfoController {
 	private InfoRepository respository;
-	private TrojanRepository trojanRespository;
-	public InfoController(InfoRepository respository,TrojanRepository trojanRespository) {
+	private TrojanRepository trojanRepository;
+	private DetectHistoryRepository detectHistoryRepository;
+	private DomainDetectResultRepository domainDetectResultRepository;
+	public InfoController(InfoRepository respository,TrojanRepository trojanRespository,
+			DetectHistoryRepository detectHistoryRepository,DomainDetectResultRepository domainDetectResultRepository) {
 		this.respository = respository;
-		this.trojanRespository = trojanRespository;
+		this.trojanRepository = trojanRespository;
+		this.detectHistoryRepository = detectHistoryRepository;
+		this.domainDetectResultRepository = domainDetectResultRepository;
 	}
 	@GetMapping("/info/flowNum")
 	@CrossOrigin(origins = "http://localhost:4200")
@@ -54,20 +71,136 @@ public class InfoController {
 		dataFormat.addData(new ThreatNum(info.getTime(), info.getThreatNum(),info.getHandledNum(),info.getNotHandleNum()));
 		return dataFormat;
 	}
-	@GetMapping("/info/trojan")
+	@GetMapping("/info/trojanIpCount")
 	@CrossOrigin(origins = "http://localhost:4200")
-	public DataFormat<Object> trojan(@RequestParam (value = "time",required = false)String time,
-			@RequestParam (value = "page",required = true) int page,
-			@RequestParam (value = "size",required = true)int size){
+	public DataFormat<Object> trojanIpCount(@RequestParam(value = "n",required = true)int n){
 		DataFormat<Object> dataFormat = new DataFormat<Object>();
-		if (time == null) {
-			Page<Trojan> page2 = trojanRespository.findAll(PageRequest.of(page, size));
-			dataFormat.addData(page2);
-		}
-		else {
-			Page<Trojan> pages = trojanRespository.findByTimeGreaterThan(time, PageRequest.of(page, size));
-			dataFormat.addData(pages);
+		Trojan newest = trojanRepository.findFirst1ByTimeGreaterThan("0", new Sort(Direction.DESC, "time"));
+		List<Trojan> list = trojanRepository.findByTime(newest.getTime());
+		TreeMap<String, Integer> map = new TreeMap<String, Integer>();
+		list.forEach(trojan->{
+			if (map.containsKey(trojan.getSrcIP())) {
+				map.put(trojan.getSrcIP(), map.get(trojan.getSrcIP()) + 1);
+			}
+			else {
+				map.put(trojan.getSrcIP(), 1);
+			}
+			if (map.containsKey(trojan.getDesIP())) {
+				map.put(trojan.getDesIP(), map.get(trojan.getDesIP()) + 1);
+			}
+			else {
+				map.put(trojan.getDesIP(), 1);
+			}
+		});
+		for (int i = 0; i < n && map.size() > 0; i++) {
+			int max = Integer.MIN_VALUE;
+			String maxString = null;
+			Set<Entry<String, Integer>> set = map.entrySet();
+			for (Iterator<Entry<String, Integer>> iterator = set.iterator(); iterator.hasNext();) {
+				Entry<String, Integer> entry = iterator.next();
+				if (max < entry.getValue()) {
+					max = entry.getValue();
+					maxString = entry.getKey();
+				}
+			}
+			dataFormat.addData(new IpCountView(maxString, max));
+			map.remove(maxString);
 		}
 		return dataFormat;
 	}
+	@GetMapping("/info/threatLevelNum")
+	@CrossOrigin(origins = "http://localhost:4200")
+	public DataFormat<Object> threatLevelNum() {
+		DataFormat<Object> dataFormat = new DataFormat<Object>();
+		ArrayList<String> type = new ArrayList<String>();
+		ArrayList<int[]> leveList = new ArrayList<int[]>();
+		Trojan newest = trojanRepository.findFirst1ByTimeGreaterThan("0", new Sort(Direction.DESC, "time"));
+		int[] level = new int[5];
+		level[4] = trojanRepository.countByTimeAndThreatLevel(newest.getTime(), 5);
+		level[3] = trojanRepository.countByTimeAndThreatLevel(newest.getTime(), 4);
+		level[2] = trojanRepository.countByTimeAndThreatLevel(newest.getTime(), 3);
+		level[1] = trojanRepository.countByTimeAndThreatLevel(newest.getTime(), 2);
+		level[0] = trojanRepository.countByTimeAndThreatLevel(newest.getTime(), 1) + 
+				trojanRepository.countByTimeAndThreatLevel(newest.getTime(), 0);
+		type.add("trojan");
+		leveList.add(level);
+		
+		level = new int[5];
+		List<DetectHistory> histories = detectHistoryRepository.findFirst1ByDetectTimeGreaterThan(
+    			"0", new Sort(Direction.DESC, "detectTime"));
+        List<DomainDetectResult> ddrlist = domainDetectResultRepository.findDomainDetectResultsByHistoryId(
+        		histories.size()==0?-1:histories.get(0).gethId());
+        for(int i =0;i<ddrlist.size();i++){
+            String[] iplist = ddrlist.get(i).getIp().split(" ");
+            int n =iplist.length;
+            if(n<=1){
+                level[0]++;
+            }else if(n<=3){
+                level[1]++;
+            }else if(n<=6){
+                level[2]++;
+            }else if(n<=10){
+                level[3]++;
+            }else{
+                level[4]++;
+            }
+        }
+        type.add("dns");
+        leveList.add(level);
+        
+        dataFormat.addData(new ThreatLevelNum(type,leveList));
+		return dataFormat;
+	}
+    @GetMapping("/info/threatLevel")
+    @CrossOrigin(origins = "http://localhost:4200")
+    public DataFormat<Object> getDomainThreadView(){
+    	List<DetectHistory> histories = detectHistoryRepository.findFirst1ByDetectTimeGreaterThan(
+    			"0", new Sort(Direction.DESC, "detectTime"));
+        List<DomainDetectResult> ddrlist = domainDetectResultRepository.findDomainDetectResultsByHistoryId(
+        		histories.size()==0?-1:histories.get(0).gethId());
+        DataFormat<Object> dataFormat = new DataFormat<Object>();
+        getThreatViewList(ddrlist).forEach(data->{
+        	dataFormat.addData(data);
+        });
+
+        return dataFormat;
+    }
+    public List<ThreatLevel> getThreatViewList(List<DomainDetectResult> domainDetectResultList){
+        List<ThreatLevel> domainThreadViewList = new ArrayList<>();
+        int l1=0;
+        int l2=0;
+        int l3=0;
+        int l4=0;
+        int l5=0;
+        for(int i =0;i<domainDetectResultList.size();i++){
+            String[] iplist = domainDetectResultList.get(i).getIp().split(" ");
+            int n =iplist.length;
+            if(n<=1){
+                l1++;
+            }else if(n<=3){
+                l2++;
+            }else if(n<=6){
+                l3++;
+            }else if(n<=10){
+                l4++;
+            }else{
+                l5++;
+            }
+        }
+        
+        Trojan newest = trojanRepository.findFirst1ByTimeGreaterThan("0", new Sort(Direction.DESC, "time"));
+		l5 += trojanRepository.countByTimeAndThreatLevel(newest.getTime(), 5);
+		l4 += trojanRepository.countByTimeAndThreatLevel(newest.getTime(), 4);
+		l3 += trojanRepository.countByTimeAndThreatLevel(newest.getTime(), 3);
+		l2 += trojanRepository.countByTimeAndThreatLevel(newest.getTime(), 2);
+		l1 += trojanRepository.countByTimeAndThreatLevel(newest.getTime(), 1) + 
+				trojanRepository.countByTimeAndThreatLevel(newest.getTime(), 0);
+		
+        domainThreadViewList.add(new ThreatLevel(1,l1));
+        domainThreadViewList.add(new ThreatLevel(2,l2));
+        domainThreadViewList.add(new ThreatLevel(3,l3));
+        domainThreadViewList.add(new ThreatLevel(4,l4));
+        domainThreadViewList.add(new ThreatLevel(5,l5));
+        return domainThreadViewList;
+    }
 }

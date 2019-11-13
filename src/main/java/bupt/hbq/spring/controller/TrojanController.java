@@ -1,7 +1,5 @@
 package bupt.hbq.spring.controller;
 
-import java.util.Random;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -11,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import bupt.hbq.spring.dao.TrojanRepository;
 import bupt.hbq.spring.objects.DataFormat;
-import bupt.hbq.spring.objects.Trojan;
+import bupt.hbq.spring.objects.trojan.Trojan;
 import bupt.hbq.spring.service.TrojanSerch;
 @RestController
 public class TrojanController {

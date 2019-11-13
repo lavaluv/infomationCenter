@@ -2,7 +2,7 @@ package bupt.hbq.spring.event;
 
 import org.springframework.context.ApplicationEvent;
 
-import bupt.hbq.spring.objects.TrojanView;
+import bupt.hbq.spring.objects.trojan.TrojanView;
 
 public class TrojanViewEvent extends ApplicationEvent{
 	/**

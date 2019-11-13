@@ -9,11 +9,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 import org.pcap4j.core.NotOpenException;
@@ -40,25 +38,27 @@ import com.csvreader.CsvWriter;
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.AsnResponse;
+import com.maxmind.geoip2.model.CityResponse;
 import com.maxmind.geoip2.model.CountryResponse;
 
 import bupt.hbq.spring.event.DnsPcapEvent;
 import bupt.hbq.spring.event.HostDetectionEvent;
 import bupt.hbq.spring.objects.info.DnsInfo;
-import bupt.hbq.spring.objects.info.Info;
 @Service
 public class DNSPcap {
 	private static final String TEST_STRING = "src/main/resources/";
 	private static final String PCAP_OUT = "dataInput/dns/csv/";
 	private static final String COUNTRY_DATABASE = "dataInput/dns/geoIP/GeoLite2-Country.mmdb";
 	private static final String ASN_DATABASE = "dataInput/dns/geoIP/GeoLite2-ASN.mmdb";
+	private static final String CITY_DATABASE = "dataInput/dns/geoIP/GeoLite2-City.mmdb";
 	@Autowired
 	private ApplicationContext applicationContext;
 	public void register(DnsInfo dnsInfo) {
 		applicationContext.publishEvent(new DnsPcapEvent(this, dnsInfo));
 	}
-	public void registerDetection(String csvString,DnsInfo dnsInfo) {
-		applicationContext.publishEvent(new HostDetectionEvent(this, csvString,dnsInfo));
+	public void registerDetection(String csvString,HashMap<String, HashSet<String>> srcIpDesIp, HashMap<String, HashSet<String>> city, 
+			DnsInfo dnsInfo) {
+		applicationContext.publishEvent(new HostDetectionEvent(this, csvString,srcIpDesIp,city,dnsInfo));
 	}
 	public void pcapToCsv(File pcapFile,DnsInfo dnsInfo){
 	    PcapHandle handle = null;
@@ -68,11 +68,15 @@ public class DNSPcap {
 			DatabaseReader countryReader = new DatabaseReader.Builder(countryData).build();
 			File asnData = new File(ASN_DATABASE);
 			DatabaseReader asnReader = new DatabaseReader.Builder(asnData).build();
+			File cityData = new File(CITY_DATABASE);
+			DatabaseReader cityReader = new DatabaseReader.Builder(cityData).build();
 		    HashMap<String, double[]> outMap = new HashMap<String, double[]>();
 		    HashMap<String, Integer> map = new HashMap<String, Integer>(); 
 		    HashMap<String, HashSet<String>> ipMap = new HashMap<String, HashSet<String>>();
 		    HashMap<String, HashSet<Integer>> asnMap = new HashMap<String, HashSet<Integer>>();
 		    HashMap<String, HashSet<String>> countryMap = new HashMap<String, HashSet<String>>();
+		    HashMap<String, HashSet<String>> srcIpDesIp = new HashMap<String, HashSet<String>>();
+		    HashMap<String, HashSet<String>> city = new HashMap<String, HashSet<String>>();
 		    int packetNum = 0;
 		    String outFileName = PCAP_OUT+pcapFile.getName().split("\\.")[0]+".csv";
 			CsvWriter csvWriter = new CsvWriter(outFileName, ',',Charset.forName("GBK"));
@@ -121,6 +125,16 @@ public class DNSPcap {
 												String hostName = question.getQName().getName();
 												String name = desAddress.getHostAddress()+srcAddress.getHostAddress()+
 														String.valueOf(dnsHeader.getId());
+												//src_des ip
+												String srcDesIp = srcAddress.getHostAddress()+"_"+desAddress.getHostAddress();
+												if (srcIpDesIp.containsKey(hostName)) {
+													srcIpDesIp.get(hostName).add(srcDesIp);
+												}
+												else {
+													HashSet<String> set = new HashSet<String>();
+													set.add(srcDesIp);
+													srcIpDesIp.put(hostName,set);
+												}
 												//ip
 												HashSet<String> ip = null;
 												if (ipMap.containsKey(hostName)) {
@@ -155,11 +169,22 @@ public class DNSPcap {
 														}
 														CountryResponse countryResponse = countryReader.country(InetAddress.getByName(inetAddress));
 														AsnResponse asnResponse = asnReader.asn(InetAddress.getByName(inetAddress));
+														CityResponse cityResponse = cityReader.city(InetAddress.getByName(inetAddress));
 														if (!country.contains(countryResponse.getCountry().getName())) {
 															country.add(countryResponse.getCountry().getName());
 														}
 														if (!asn.contains(asnResponse.getAutonomousSystemNumber())) {
 															asn.add(asnResponse.getAutonomousSystemNumber());
+														}
+														if (cityResponse.getCity().getName()!=null) {
+															if (city.containsKey(hostName)) {
+																city.get(hostName).add(cityResponse.getCity().getName());
+															}
+															else {
+																HashSet<String> set = new HashSet<String>();
+																set.add(cityResponse.getCity().getName());
+																city.put(hostName,set);
+															}
 														}
 													} catch (UnknownHostException e) {
 														//TODO
@@ -234,7 +259,7 @@ public class DNSPcap {
 				csvWriter.close();
 				dnsInfo.setPackageNum(packetNum);
 				register(dnsInfo);
-				registerDetection(outFileName,dnsInfo);
+				registerDetection(outFileName,srcIpDesIp,city,dnsInfo);
 				end = System.currentTimeMillis();
 				System.out.println((end - start)+" "+pcapFile.getName()+" end");
 			}

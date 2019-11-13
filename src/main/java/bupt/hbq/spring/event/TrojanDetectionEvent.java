@@ -3,8 +3,6 @@ package bupt.hbq.spring.event;
 import java.util.HashMap;
 
 import org.springframework.context.ApplicationEvent;
-
-import bupt.hbq.spring.objects.info.Info;
 import bupt.hbq.spring.objects.info.TrojanInfo;
 
 public class TrojanDetectionEvent extends ApplicationEvent{

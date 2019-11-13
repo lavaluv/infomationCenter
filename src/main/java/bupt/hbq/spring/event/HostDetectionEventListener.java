@@ -2,9 +2,6 @@ package bupt.hbq.spring.event;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,13 +37,16 @@ public class HostDetectionEventListener {
 		try {
 			//wait csvWriter end writing
 			Thread.sleep(5000);
-			ArrayList<DomainDetectResult> result = detection.modelPrediction(hostDetectionEvent.getCsvPath());
+			ArrayList<DomainDetectResult> result = detection.modelPrediction(hostDetectionEvent.getCsvPath(),hostDetectionEvent.getSrcIpDesIp(),
+					hostDetectionEvent.getCity());
 			DnsInfo dnsInfo = hostDetectionEvent.getDnsInfo();
 			DetectHistory detectHistory = new DetectHistory(dnsInfo.getTime(), 1);
+			detectHistory.setDetectSize(result.size());
 			detectHistoryRepository.save(detectHistory);
 			result.forEach(r->{
 				r.setHistoryId(detectHistoryRepository.findFirst1ByHIdGreaterThan(0l, 
 						new Sort(Direction.DESC, "hId")).get(0).gethId());
+				r.setDetectTime(dnsInfo.getTime());
 			});
 			System.out.println("DNS detection end");
 			List<Info> info = infoRepository.findByTime(hostDetectionEvent.getDnsInfo().getTime());
@@ -62,6 +62,9 @@ public class HostDetectionEventListener {
 			// TODO: handle exception
 			e.printStackTrace();
 		} catch (InterruptedException e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
 		}

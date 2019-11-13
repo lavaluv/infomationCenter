@@ -8,7 +8,6 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import bupt.hbq.spring.objects.info.DnsInfo;
-import bupt.hbq.spring.objects.info.Info;
 
 @RepositoryRestResource
 @CrossOrigin(origins = "http://localhost:4200")

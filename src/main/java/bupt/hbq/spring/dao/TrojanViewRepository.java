@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
-import bupt.hbq.spring.objects.TrojanView;
+import bupt.hbq.spring.objects.trojan.TrojanView;
 
 @RepositoryRestResource
 @CrossOrigin(origins = "http://localhost:4200")

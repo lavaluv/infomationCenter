@@ -2,6 +2,8 @@ package bupt.hbq.spring.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,9 +14,9 @@ import bupt.hbq.spring.dao.DomainDetectResultRepository;
 import bupt.hbq.spring.objects.DataFormat;
 import bupt.hbq.spring.objects.dns.DetectHistory;
 import bupt.hbq.spring.objects.dns.DomainDetectResult;
+import bupt.hbq.spring.service.DNSSerch;
+import lombok.val;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 
@@ -59,11 +61,27 @@ public class DomainDectCotroller {
     }
     @GetMapping("/detail")
     @CrossOrigin(origins = "http://localhost:4200")
-    public DataFormat<Object> getDetectHistoryDetail(@RequestParam(value = "hId",required = true)long hId,
-    		@RequestParam(value = "page",required = true)int page,
-    		@RequestParam(value = "size",required = true)int size){
+    public DataFormat<Object> getDetectHistoryDetail(@RequestParam(value = "page",required = true)int page, 
+    		@RequestParam(value = "size",required = true)int size,
+    		@RequestParam(value = "fromTime",required = false)String fromTime,
+    		@RequestParam(value = "toTime",required = false)String toTime,
+    		@RequestParam(value = "city",required = false)String city,
+    		@RequestParam(value = "domain",required =  false)String domain,
+    		@RequestParam(value = "ip",required = false)String ip,
+    		@RequestParam(value = "srcIp",required = false)String srcIp,
+    		@RequestParam(value = "desIp",required = false)String desIp){
         DataFormat<Object> dataFormat = new DataFormat<Object>();
-        Page<DomainDetectResult> domainPage = domainDetectResultRepository.findByHistoryId(hId, PageRequest.of(page, size));
+		if (toTime == null || toTime == "") {
+			toTime = String.valueOf(System.currentTimeMillis());
+		}
+		DomainDetectResult detectResult = new DomainDetectResult();
+		detectResult.setCitylist(city);
+		detectResult.setDomain(domain);
+		detectResult.setIp(ip);
+		detectResult.setSrcIplist(srcIp);
+		detectResult.setDesIplist(desIp);
+        Page<DomainDetectResult> domainPage = domainDetectResultRepository.findAll(
+        		DNSSerch.queryDomainListByDomainDetectResult(detectResult, fromTime, toTime), PageRequest.of(page, size));
         dataFormat.addData(domainPage);
         return dataFormat;
     }

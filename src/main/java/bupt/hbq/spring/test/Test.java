@@ -43,37 +43,37 @@ public class Test {
 	private static final int DETECT_PACKET_SIZE = 2000;
 	public static void main(String[] args)throws Exception{
 		//test http post
-		String path = "src/main/resources/static/trojanImages/normal.png";
-		Test test = new Test();
-		HashMap<String, int[]> byteMap = test.trojanPcapToPng();
-		ArrayList<HashMap<String, Object>> resultAll = new ArrayList<HashMap<String,Object>>();
-		Set<Entry<String, int[]>> set = byteMap.entrySet();
-		ArrayList<int[]> in = new ArrayList<int[]>();
-		ArrayList<String> strings = new ArrayList<String>();
-		int index = 0;
-		for (Iterator<Entry<String, int[]>> iterator = set.iterator(); iterator.hasNext();index++) {
-			Entry<String, int[]> entry = iterator.next();
-			in.add(entry.getValue());
-			strings.add(entry.getKey());
-			if (index == DETECT_PACKET_SIZE) {
-				ArrayList<HashMap<String, Object>> resultArrayList = test.detectResult(in);
-				System.out.println(resultArrayList);
-				resultAll.addAll(resultArrayList);
-				in.clear();
-				index = 0;
-			}
-		}
-		if (in.size() != 0) {
-			ArrayList<HashMap<String, Object>> resultArrayList = test.detectResult(in);
-			System.out.println(resultArrayList);
-			resultAll.addAll(resultArrayList);
-		}
-		System.out.println(strings.size()+":"+resultAll.size());
-		String[] resultStrings = new String[5];
-		for (int i = 0; i < strings.size(); i++) {
-			resultStrings = strings.get(i).split("_");
-			System.out.println(resultStrings[0]+"_"+resultStrings[1]+"_"+resultStrings[2]+"_"+resultStrings[3]+"_"+resultStrings[4]);
-		}
+//		String path = "src/main/resources/static/trojanImages/normal.png";
+//		Test test = new Test();
+//		HashMap<String, int[]> byteMap = test.trojanPcapToPng();
+//		ArrayList<HashMap<String, Object>> resultAll = new ArrayList<HashMap<String,Object>>();
+//		Set<Entry<String, int[]>> set = byteMap.entrySet();
+//		ArrayList<int[]> in = new ArrayList<int[]>();
+//		ArrayList<String> strings = new ArrayList<String>();
+//		int index = 0;
+//		for (Iterator<Entry<String, int[]>> iterator = set.iterator(); iterator.hasNext();index++) {
+//			Entry<String, int[]> entry = iterator.next();
+//			in.add(entry.getValue());
+//			strings.add(entry.getKey());
+//			if (index == DETECT_PACKET_SIZE) {
+//				ArrayList<HashMap<String, Object>> resultArrayList = test.detectResult(in);
+//				System.out.println(resultArrayList);
+//				resultAll.addAll(resultArrayList);
+//				in.clear();
+//				index = 0;
+//			}
+//		}
+//		if (in.size() != 0) {
+//			ArrayList<HashMap<String, Object>> resultArrayList = test.detectResult(in);
+//			System.out.println(resultArrayList);
+//			resultAll.addAll(resultArrayList);
+//		}
+//		System.out.println(strings.size()+":"+resultAll.size());
+//		String[] resultStrings = new String[5];
+//		for (int i = 0; i < strings.size(); i++) {
+//			resultStrings = strings.get(i).split("_");
+//			System.out.println(resultStrings[0]+"_"+resultStrings[1]+"_"+resultStrings[2]+"_"+resultStrings[3]+"_"+resultStrings[4]);
+//		}
 	}
 	private static final String URL = "http://10.3.200.130:8501/v1/models/cnn:predict";
 	@SuppressWarnings("unchecked")

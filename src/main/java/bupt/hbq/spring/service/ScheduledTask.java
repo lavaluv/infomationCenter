@@ -48,6 +48,7 @@ public class ScheduledTask {
 	}
 	@Scheduled(fixedDelay = 300000)
 	public void testDns() {
+		System.out.println("dns "+DATE_FORMAT.format(new Date()));
 		File file = new File(DNS_TEST_FILE);
 		DnsInfo dnsInfo = new DnsInfo();
 		dnsInfo.setFlowNum(file.length());
@@ -58,6 +59,7 @@ public class ScheduledTask {
 	}
 	@Scheduled(fixedDelay = 300000)
 	public void testTrojan() {
+		System.out.println("trojan "+DATE_FORMAT.format(new Date()));
 		File file = new File(TROJAN_TEST_FILE);
 		TrojanInfo trojanInfo = new TrojanInfo();
 		trojanInfo.setFlowNum(file.length());

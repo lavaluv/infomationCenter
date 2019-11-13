@@ -10,7 +10,7 @@ import javax.persistence.criteria.Root;
 
 import org.springframework.data.jpa.domain.Specification;
 
-import bupt.hbq.spring.objects.Trojan;
+import bupt.hbq.spring.objects.trojan.Trojan;
 
 public class TrojanSerch {
 	public static Specification<Trojan> queryTrojanListByTrojan(Trojan trojan,String fromTime,String toTime){
@@ -59,7 +59,6 @@ public class TrojanSerch {
 				if (info != null & info != "") {
 					predicates.add(builder.like(root.get("info"), "%"+info+"%"));
 				}
-				System.out.println(predicates.toString());
 				Predicate[] predicateAll = new Predicate[predicates.size()];
 				return builder.and(predicates.toArray(predicateAll));
 			}

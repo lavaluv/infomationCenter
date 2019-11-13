@@ -6,7 +6,6 @@ import lombok.ToString;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import java.util.Date;
 
 @Entity
 @ToString @EqualsAndHashCode
@@ -19,9 +18,19 @@ public class DetectHistory {
         this.hId = hId;
     }
 
+    public int getDetectSize() {
+        return detectSize;
+    }
+
+    public void setDetectSize(int detectSize) {
+        this.detectSize = detectSize;
+    }
+
     @Id @GeneratedValue
     private long hId;
+
     private String detectTime;
+    private int detectSize;
     private long userId;
     public DetectHistory(){
 

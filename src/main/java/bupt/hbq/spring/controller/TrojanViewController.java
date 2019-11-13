@@ -1,8 +1,8 @@
 package bupt.hbq.spring.controller;
 
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import bupt.hbq.spring.dao.TrojanRepository;
 import bupt.hbq.spring.dao.TrojanViewRepository;
 import bupt.hbq.spring.objects.DataFormat;
-import bupt.hbq.spring.objects.TrojanView;
+import bupt.hbq.spring.objects.trojan.TrojanViewPort;
 
 @RestController
 public class TrojanViewController {
@@ -24,27 +24,48 @@ public class TrojanViewController {
 	@GetMapping("/trojan/view/flow")
 	@CrossOrigin(origins = "http://localhost:4200")
 	public DataFormat<Object> flowView(@RequestParam (value = "time",required = true) String time){
-//		for (int i = 0; i < 30; i++) {
-//		Random random = new Random();
-//		ArrayList<String> protocolName = new ArrayList<String>();
-//		ArrayList<Integer> protocolSize = new ArrayList<Integer>();
-//		protocolName.add("TCP");
-//		protocolSize.add(random.nextInt(300));
-//		protocolName.add("UDP");
-//		protocolSize.add(random.nextInt(300));
-//		protocolName.add("DNS");
-//		protocolSize.add(random.nextInt(300));
-//		TrojanView trojanView = new TrojanView();
-//		trojanView.setProtocol(protocolName);
-//		trojanView.setSize(protocolSize);
-//		trojanView.setTime(String.valueOf(System.currentTimeMillis()-i*1000*180));
-//		trojanViewRespository.save(trojanView);
-//	}
 		DataFormat<Object> dataFormat = new DataFormat<Object>();
 		trojanViewRespository.findByTimeGreaterThan(time).forEach(view->{
 			dataFormat.addData(view);
 		});
-//		trojanViewRespository.deleteAllInBatch();
+		return dataFormat;
+	}
+	@GetMapping("/trojan/view/srcPort")
+	@CrossOrigin(origins = "http://localhost:4200")
+	public DataFormat<Object> srcPortView(@RequestParam (value = "top",required = true)int top){
+		DataFormat<Object> dataFormat = new DataFormat<Object>();
+		List<Object[]> srcList = trojanRepository.findsrcPortCount(PageRequest.of(0, top)).getContent();
+		for (int i = 0; i < top; i++) {
+			TrojanViewPort trojanViewPort = new TrojanViewPort();
+			if (i < srcList.size()) {
+				trojanViewPort.setPort((int)srcList.get(i)[0]);
+				trojanViewPort.setNumber((long)srcList.get(i)[1]);
+			}
+			else {
+				trojanViewPort.setPort(0);
+				trojanViewPort.setNumber(0);
+			}
+			dataFormat.addData(trojanViewPort);
+		}
+		return dataFormat;
+	}
+	@GetMapping("/trojan/view/desPort")
+	@CrossOrigin(origins = "http://localhost:4200")
+	public DataFormat<Object> desPortView(@RequestParam (value = "top",required = true)int top){
+		DataFormat<Object> dataFormat = new DataFormat<Object>();
+		List<Object[]> desList = trojanRepository.finddesPortCount(PageRequest.of(0, top)).getContent();
+		for (int i = 0; i < top; i++) {
+			TrojanViewPort trojanViewPort = new TrojanViewPort();
+			if (i < desList.size()) {
+				trojanViewPort.setPort((int)desList.get(i)[0]);
+				trojanViewPort.setNumber((long)desList.get(i)[1]);
+			}
+			else {
+				trojanViewPort.setPort(0);
+				trojanViewPort.setNumber(0);
+			}
+			dataFormat.addData(trojanViewPort);
+		}
 		return dataFormat;
 	}
 }

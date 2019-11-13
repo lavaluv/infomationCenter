@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import bupt.hbq.spring.objects.DataFormat;
-import bupt.hbq.spring.objects.TrojanInstances;
+import bupt.hbq.spring.objects.trojan.TrojanInstances;
 
 @RestController
 public class TrojanModelController {

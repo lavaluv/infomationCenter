@@ -1,8 +1,6 @@
 package bupt.hbq.spring.event;
 
 import org.springframework.context.ApplicationEvent;
-
-import bupt.hbq.spring.objects.info.Info;
 import bupt.hbq.spring.objects.info.TrojanInfo;
 
 public class TrojanPcapEvent extends ApplicationEvent{

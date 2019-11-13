@@ -7,7 +7,7 @@ import bupt.hbq.spring.dao.DomainDetectResultRepository;
 import bupt.hbq.spring.objects.DataFormat;
 import bupt.hbq.spring.objects.dns.DetectHistory;
 import bupt.hbq.spring.objects.dns.DomainDetectResult;
-import bupt.hbq.spring.objects.dns.DomainThreadView;
+import bupt.hbq.spring.objects.dns.HistoryRecordView;
 import bupt.hbq.spring.objects.dns.IpCountView;
 import bupt.hbq.spring.objects.dns.MapView;
 import bupt.hbq.spring.service.IpCounttryUtil;
@@ -15,6 +15,7 @@ import bupt.hbq.spring.service.IpCounttryUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class DomainViewController {
         this.domainDetectResultRepository = domainDetectResultRepository;
         this.detectHistoryRepository =detectHistoryRepository;
     }
-    @GetMapping("/ipcount")
+    @GetMapping("/info/dnsIpCount")
     @CrossOrigin(origins = "http://localhost:4200")
     public DataFormat<Object> getIpCountView(@RequestParam(value = "n",required = true)int n){
     	List<DetectHistory> histories = detectHistoryRepository.findFirst1ByDetectTimeGreaterThan(
@@ -67,7 +68,7 @@ public class DomainViewController {
         Collections.sort(viewsList, new Comparator<IpCountView>() {
             @Override
             public int compare(IpCountView o1, IpCountView o2) {
-                return o1.getCountnumber()-o2.getCountnumber();
+                return o2.getCountnumber()-o1.getCountnumber();
             }
         });
         if(viewsList.size()<=n){
@@ -80,56 +81,6 @@ public class DomainViewController {
             return finalviewlist;
         }
 
-    }
-    public List<DomainThreadView> getDomainThreadViewList(List<DomainDetectResult> domainDetectResultList){
-        List<DomainThreadView> domainThreadViewList = new ArrayList<>();
-        int l1=0;
-        int l2=0;
-        int l3=0;
-        int l4=0;
-        int l5=0;
-        for(int i =0;i<domainDetectResultList.size();i++){
-            String[] iplist = domainDetectResultList.get(i).getIp().split(" ");
-            int n =iplist.length;
-            if(n<=1){
-                l1++;
-            }else if(n<=3){
-                l2++;
-            }else if(n<=6){
-                l3++;
-            }else if(n<=10){
-                l4++;
-            }else{
-                l5++;
-            }
-        }
-        float p1 = (float) l1/(l1+l2+l3+l4+l5);
-        float p2 = (float) l2/(l1+l2+l3+l4+l5);
-        float p3 = (float) l3/(l1+l2+l3+l4+l5);
-        float p4 = (float) l4/(l1+l2+l3+l4+l5);
-        float p5 = (float) l5/(l1+l2+l3+l4+l5);
-        domainThreadViewList.add(new DomainThreadView(1,p1));
-        domainThreadViewList.add(new DomainThreadView(2,p2));
-        domainThreadViewList.add(new DomainThreadView(3,p3));
-        domainThreadViewList.add(new DomainThreadView(4,p4));
-        domainThreadViewList.add(new DomainThreadView(5,p5));
-
-
-        return domainThreadViewList;
-    }
-    @GetMapping("/idanger")
-    @CrossOrigin(origins = "http://localhost:4200")
-    public DataFormat<Object> getDomainThreadView(){
-    	List<DetectHistory> histories = detectHistoryRepository.findFirst1ByDetectTimeGreaterThan(
-    			"0", new Sort(Direction.DESC, "detectTime"));
-        List<DomainDetectResult> ddrlist = domainDetectResultRepository.findDomainDetectResultsByHistoryId(
-        		histories.size()==0?-1:histories.get(0).gethId());
-        DataFormat<Object> dataFormat = new DataFormat<Object>();
-        getDomainThreadViewList(ddrlist).forEach(data->{
-        	dataFormat.addData(data);
-        });
-
-        return dataFormat;
     }
     public List<MapView> getMapViewList(List<DomainDetectResult> ddrist){
         List<MapView> mapViewList = new ArrayList<>();
@@ -154,6 +105,53 @@ public class DomainViewController {
         	dataFormat.addData(data);
         });
         return dataFormat;
+
+    }
+    @GetMapping("/historyView")
+    @CrossOrigin(origins = "http://localhost:4200")
+    public DataFormat<Object> getHistory(@RequestParam(value = "gap",required = true)String gap) throws Exception{
+
+        long endTime = new Date().getTime();
+        long gap_l = Long.parseLong(gap);
+        long startTime = new Date().getTime()-gap_l;
+
+        List<DetectHistory> dhlist =detectHistoryRepository.findDetectHistoriesByDetectTimeBetween(""+startTime,""+endTime);
+        ArrayList<HistoryRecordView> hrlist = getHistoryRecordViewList(dhlist,endTime,gap_l);
+        DataFormat<Object> df = new DataFormat<>();
+        for(int i =0;i<hrlist.size();i++){
+            df.addData(hrlist.get(i));
+        }
+        return df;
+    }
+    public ArrayList<HistoryRecordView> getHistoryRecordViewList(List<DetectHistory> dhlist,long endTime,long gap){
+        ArrayList<HistoryRecordView> hrlist = new ArrayList<>();
+        long[] datelist = new long[7];
+        long gap1 =gap/6;
+        for(int i =0;i<datelist.length;i++){
+            datelist[i] = endTime-gap1*i;
+        }
+        int[] l = new int[6];
+        for(int i =0;i<dhlist.size();i++){
+            DetectHistory dh =dhlist.get(i);
+            long n = Long.parseLong(dh.getDetectTime());
+            if(n>datelist[6]&&n<=datelist[5]){
+                l[5]+=dh.getDetectSize();
+            }else if(n>datelist[5]&&n<=datelist[4]){
+                l[4]+=dh.getDetectSize();
+            }else if(n>datelist[4]&&n<=datelist[3]){
+                l[3]+=dh.getDetectSize();
+            }else if(n>datelist[3]&&n<=datelist[2]){
+                l[2]+=dh.getDetectSize();
+            }else if(n>datelist[2]&&n<=datelist[1]){
+                l[1]+=dh.getDetectSize();
+            }else if(n>datelist[1]&&n<=datelist[0]){
+                l[0]+=dh.getDetectSize();
+            }
+        }
+        for(int i =0;i<6;i++){
+            hrlist.add(new HistoryRecordView(""+datelist[i],l[i]));
+        }
+        return hrlist;
 
     }
 }
