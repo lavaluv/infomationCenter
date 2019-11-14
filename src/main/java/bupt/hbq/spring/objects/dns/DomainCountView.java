@@ -1,21 +1,21 @@
 package bupt.hbq.spring.objects.dns;
 
 public class DomainCountView {
-    private int countnumber;
+    private long countnumber;
     private String Domain;
     public DomainCountView(){
 
     }
-    public DomainCountView(int countnumber, String domain) {
+    public DomainCountView(long countnumber, String domain) {
         this.countnumber = countnumber;
         Domain = domain;
     }
 
-    public int getCountnumber() {
+    public long getCountnumber() {
         return countnumber;
     }
 
-    public void setCountnumber(int countnumber) {
+    public void setCountnumber(long countnumber) {
         this.countnumber = countnumber;
     }
 

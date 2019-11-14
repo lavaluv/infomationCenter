@@ -21,7 +21,9 @@ public class DomainDetectResult {
     private float asnNumber;
     private float countryNumber;
     private float aRecordNumber;
+    @Column(columnDefinition = "text")
     private String srcIplist;
+    @Column(columnDefinition = "text")
     private String desIplist;
     private String detectTime;
     private String citylist;

@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public class IpCounttryUtil {
+public class IpAddressUtil {
 	private static final String CITY_DATABASE_PATH = "dataInput/dns/geoIP/GeoLite2-City.mmdb";
     public static DatabaseReader CreatCityReader(){
         File database = new File(CITY_DATABASE_PATH);
@@ -21,7 +21,7 @@ public class IpCounttryUtil {
         }
         return reader;
     }
-    public static String getCountry(String ip,DatabaseReader reader){
+    public static String getCity(String ip,DatabaseReader reader){
         InetAddress ipAddress =null;
         try {
             ipAddress = InetAddress.getByName(ip);

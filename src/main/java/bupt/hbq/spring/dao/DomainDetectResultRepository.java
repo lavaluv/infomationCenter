@@ -17,9 +17,6 @@ import java.util.List;
 public interface DomainDetectResultRepository extends JpaRepository<DomainDetectResult, Long>,JpaSpecificationExecutor<DomainDetectResult> {
     List<DomainDetectResult> findDomainDetectResultsByHistoryId(long historyId);
     Page<DomainDetectResult> findByHistoryId(long historyId,Pageable pageable);
-    @Query(value = "select domain,count(*)as number from domain_detect_result group by domain order by number DESC limit ?1",nativeQuery = true)
-    List<Object[]> getcountDistinctDomain(int n);
-    @Query(value = "select  ddr from DomainDetectResult ddr order by ddr.countnumber desc")
-    Page<DomainDetectResult> queryTopByCountnumber(Pageable pageable);
-    
+    @Query(value = "select ddr.Domain,sum(ddr.countnumber) as c from DomainDetectResult ddr group by ddr.Domain order by c desc")
+    Page<Object[]> queryTopByCountnumber(Pageable pageable);
 }

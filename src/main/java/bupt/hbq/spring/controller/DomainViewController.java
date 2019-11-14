@@ -1,7 +1,6 @@
 package bupt.hbq.spring.controller;
 
 import com.maxmind.geoip2.DatabaseReader;
-import com.sun.org.apache.bcel.internal.generic.NEW;
 
 import bupt.hbq.spring.dao.DetectHistoryRepository;
 import bupt.hbq.spring.dao.DomainDetectResultRepository;
@@ -12,7 +11,7 @@ import bupt.hbq.spring.objects.dns.DomainDetectResult;
 import bupt.hbq.spring.objects.dns.HistoryRecordView;
 import bupt.hbq.spring.objects.dns.IpCountView;
 import bupt.hbq.spring.objects.dns.MapView;
-import bupt.hbq.spring.service.IpCounttryUtil;
+import bupt.hbq.spring.service.IpAddressUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -87,12 +86,12 @@ public class DomainViewController {
     }
     public List<MapView> getMapViewList(List<DomainDetectResult> ddrist){
         List<MapView> mapViewList = new ArrayList<>();
-        DatabaseReader reader = IpCounttryUtil.CreatCityReader();
+        DatabaseReader reader = IpAddressUtil.CreatCityReader();
         for(int i =0;i<ddrist.size();i++){
             DomainDetectResult ddr = ddrist.get(i);
             String[] iplist = ddr.getIp().split(" ");
             for(int j =0;j<iplist.length;j++){
-                String city =IpCounttryUtil.getCountry(iplist[j],reader);
+                String city =IpAddressUtil.getCity(iplist[j],reader);
                 MapView mv = new MapView(iplist[j],city);
                 mapViewList.add(mv);
             }
@@ -159,11 +158,10 @@ public class DomainViewController {
     @GetMapping("/countAllDomain")
     @CrossOrigin(origins = "http://localhost:4200")
     public DataFormat<Object> countAllDomain(@RequestParam(value = "n",required = true) int n){
-        List<DomainDetectResult> ddr =domainDetectResultRepository.queryTopByCountnumber(PageRequest.of(0, n)).getContent();
+        List<Object[]> ddr =domainDetectResultRepository.queryTopByCountnumber(PageRequest.of(0, n)).getContent();
         DataFormat<Object> dataFormat = new DataFormat<>();
         for(int i =0;i<n;i++){
-
-            dataFormat.addData(new DomainCountView(ddr.get(i).getCountnumber(),ddr.get(i).getDomain()));
+            dataFormat.addData(new DomainCountView((long)ddr.get(i)[1],(String)ddr.get(i)[0]));
         }
         return dataFormat;
     }
