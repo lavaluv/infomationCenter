@@ -1,6 +1,7 @@
 package bupt.hbq.spring.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.maxmind.geoip2.DatabaseReader;
+
 import bupt.hbq.spring.dao.DetectHistoryRepository;
 import bupt.hbq.spring.dao.DomainDetectResultRepository;
 import bupt.hbq.spring.dao.InfoRepository;
@@ -25,11 +28,13 @@ import bupt.hbq.spring.objects.dns.DomainDetectResult;
 import bupt.hbq.spring.objects.dns.IpCountView;
 import bupt.hbq.spring.objects.info.FlowNum;
 import bupt.hbq.spring.objects.info.Info;
+import bupt.hbq.spring.objects.info.MapView;
 import bupt.hbq.spring.objects.info.PackageNum;
 import bupt.hbq.spring.objects.info.ThreatLevel;
 import bupt.hbq.spring.objects.info.ThreatLevelNum;
 import bupt.hbq.spring.objects.info.ThreatNum;
 import bupt.hbq.spring.objects.trojan.Trojan;
+import bupt.hbq.spring.service.IpAddressUtil;
 
 @RestController
 public class InfoController {
@@ -202,5 +207,95 @@ public class InfoController {
         domainThreadViewList.add(new ThreatLevel(4,l4));
         domainThreadViewList.add(new ThreatLevel(5,l5));
         return domainThreadViewList;
+    }    
+    @GetMapping("/info/ipAddress")
+    @CrossOrigin(origins = "http://localhost:4200")
+    public DataFormat<Object> getMapView(){
+    	List<DetectHistory> histories = detectHistoryRepository.findFirst1ByDetectTimeGreaterThan(
+    			"0", new Sort(Direction.DESC, "detectTime"));
+    	List<DomainDetectResult> ddrlist = domainDetectResultRepository.findDomainDetectResultsByHistoryId(
+        		histories.size()==0?-1:histories.get(0).gethId());
+    	Trojan newest = trojanRepository.findFirst1ByTimeGreaterThan("0", new Sort(Direction.DESC, "time"));
+    	List<Trojan> trojans = trojanRepository.findByTime(newest.getTime());
+        DataFormat<Object> dataFormat = new DataFormat<Object>();
+        getMapViewList(ddrlist,trojans).forEach(data->{
+        	dataFormat.addData(data);
+        });
+        return dataFormat;
+
+    }
+    public List<MapView> getMapViewList(List<DomainDetectResult> ddrist,List<Trojan> trojans){
+        List<MapView> mapViewList = new ArrayList<>();
+        DatabaseReader reader = IpAddressUtil.CreatCityReader();
+        HashMap<String,ArrayList<String>> ipCityMap = new HashMap<String, ArrayList<String>>(); 
+        HashMap<String, Integer> ipMap = new HashMap<String, Integer>();
+        for(int i =0;i<ddrist.size();i++){
+            DomainDetectResult ddr = ddrist.get(i);
+            String[] iplist = ddr.getIp().split(" ");
+            for(int j =0;j<iplist.length;j++){
+                String city =IpAddressUtil.getCity(iplist[j],reader);
+                if (city != null) {
+					if (ipCityMap.containsKey(city)) {
+						ipCityMap.get(city).add(iplist[j]);
+					}
+					else {
+						ArrayList<String> ipArrayList = new ArrayList<String>();
+						ipArrayList.add(iplist[j]);
+						ipCityMap.put(city, ipArrayList);
+					}
+					if (ipMap.containsKey(iplist[j])) {
+						ipMap.put(iplist[j], ipMap.get(iplist[j]) + 1);
+					}
+					else {
+						ipMap.put(iplist[j], 1);
+					}
+				}
+            }
+        }
+        for (int i = 0; i < trojans.size(); i++) {
+        	String desIp = trojans.get(i).getDesIP();
+            String city =IpAddressUtil.getCity(desIp,reader);
+            if (city != null) {
+				if (ipCityMap.containsKey(city)) {
+					ipCityMap.get(city).add(desIp);
+				}
+				else {
+					ArrayList<String> ipArrayList = new ArrayList<String>();
+					ipArrayList.add(desIp);
+					ipCityMap.put(city, ipArrayList);
+				}
+				if (ipMap.containsKey(desIp)) {
+					ipMap.put(desIp, ipMap.get(desIp) + 1);
+				}
+				else {
+					ipMap.put(desIp, 1);
+				}
+			}
+		}
+        
+        ipCityMap.forEach((k,v)->{
+        	StringBuilder builder = new StringBuilder();
+        	MapView mapView = new MapView();
+        	mapView.setName(k);
+        	mapView.setValue(v.size());
+        	for (int i = 0; i < 10; i++) {
+				int max = 0;
+				int index = -1;
+				for (int j = 0; j < v.size(); j++) {
+					int num = ipMap.get(v.get(j));
+					if (num > max) {
+						max = num;
+						index = j;
+					}
+				}
+				if (index != -1) {
+					builder.append(v.remove(index) + ",");
+				}
+			}
+        	builder.deleteCharAt(builder.length()-1);
+        	mapView.setWarn(builder.toString());
+        	mapViewList.add(mapView);
+        });
+        return mapViewList;
     }
 }

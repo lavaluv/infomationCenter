@@ -28,6 +28,7 @@ public class IpAddressUtil {
         } catch (UnknownHostException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+            return null;
         }
         CityResponse response = null;
         try {
@@ -35,12 +36,13 @@ public class IpAddressUtil {
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+            return null;
         } catch (GeoIp2Exception e) {
             // TODO Auto-generated catch block
-            return "";
+            return null;
         }
 
-        return response.getCity().getName();
+        return response.getCity().getNames().get("zh-CN");
 
     }
 }

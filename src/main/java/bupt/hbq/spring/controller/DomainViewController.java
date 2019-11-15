@@ -10,7 +10,7 @@ import bupt.hbq.spring.objects.dns.DomainCountView;
 import bupt.hbq.spring.objects.dns.DomainDetectResult;
 import bupt.hbq.spring.objects.dns.HistoryRecordView;
 import bupt.hbq.spring.objects.dns.IpCountView;
-import bupt.hbq.spring.objects.dns.MapView;
+import bupt.hbq.spring.objects.info.MapView;
 import bupt.hbq.spring.service.IpAddressUtil;
 
 import java.util.ArrayList;
@@ -82,31 +82,6 @@ public class DomainViewController {
             }
             return finalviewlist;
         }
-
-    }
-    public List<MapView> getMapViewList(List<DomainDetectResult> ddrist){
-        List<MapView> mapViewList = new ArrayList<>();
-        DatabaseReader reader = IpAddressUtil.CreatCityReader();
-        for(int i =0;i<ddrist.size();i++){
-            DomainDetectResult ddr = ddrist.get(i);
-            String[] iplist = ddr.getIp().split(" ");
-            for(int j =0;j<iplist.length;j++){
-                String city =IpAddressUtil.getCity(iplist[j],reader);
-                MapView mv = new MapView(iplist[j],city);
-                mapViewList.add(mv);
-            }
-        }
-        return mapViewList;
-    }
-    @GetMapping("/ipaddress")
-    @CrossOrigin(origins = "http://localhost:4200")
-    public DataFormat<Object> getMapView(@RequestParam(value = "resultId") long resultId){
-        List<DomainDetectResult> ddrlist = domainDetectResultRepository.findDomainDetectResultsByHistoryId(resultId);
-        DataFormat<Object> dataFormat = new DataFormat<Object>();
-        getMapViewList(ddrlist).forEach(data->{
-        	dataFormat.addData(data);
-        });
-        return dataFormat;
 
     }
     @GetMapping("/historyView")
