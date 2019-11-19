@@ -1,7 +1,5 @@
 package bupt.hbq.spring.controller;
 
-import com.maxmind.geoip2.DatabaseReader;
-
 import bupt.hbq.spring.dao.DetectHistoryRepository;
 import bupt.hbq.spring.dao.DomainDetectResultRepository;
 import bupt.hbq.spring.objects.DataFormat;
@@ -10,8 +8,6 @@ import bupt.hbq.spring.objects.dns.DomainCountView;
 import bupt.hbq.spring.objects.dns.DomainDetectResult;
 import bupt.hbq.spring.objects.dns.HistoryRecordView;
 import bupt.hbq.spring.objects.dns.IpCountView;
-import bupt.hbq.spring.objects.info.MapView;
-import bupt.hbq.spring.service.IpAddressUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;

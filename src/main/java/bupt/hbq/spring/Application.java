@@ -10,10 +10,11 @@ import bupt.hbq.spring.objects.User;
 
 @SpringBootApplication
 public class Application {
+	//spring入口函数
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
 	}
-	
+	//执行初始化
 	@Bean
 	ApplicationRunner init(UserRepository userRespository) {
 		return args -> {

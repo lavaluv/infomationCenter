@@ -35,9 +35,18 @@ import bupt.hbq.spring.objects.info.ThreatLevelNum;
 import bupt.hbq.spring.objects.info.ThreatNum;
 import bupt.hbq.spring.objects.trojan.Trojan;
 import bupt.hbq.spring.service.IpAddressUtil;
-
+/*
+ * info页面控制器，用于处理前端请求，返回查询结果
+ * 详见接口设计文档
+ * 
+ * @RestConroller 符合restful api的接口,以json格式传输，自动解析json请求以及封装回传的数据(即java对象与json格式相互转换)
+ * @GetMapping用于映射前端get请求
+ * @CrossOrigin用于设置跨域访问
+ * @RequestParam用于设置请求字段,value为请求字段名称,required定义是否为必须字段
+ */
 @RestController
 public class InfoController {
+	//绑定jpa repository，用以操作数据库
 	private InfoRepository respository;
 	private TrojanRepository trojanRepository;
 	private DetectHistoryRepository detectHistoryRepository;
@@ -49,7 +58,13 @@ public class InfoController {
 		this.detectHistoryRepository = detectHistoryRepository;
 		this.domainDetectResultRepository = domainDetectResultRepository;
 	}
-	@GetMapping("/info/flowNum")
+	/*
+	 * 请求流量大小
+	 * @Param time:起始时间
+	 * @Return FlowNum:流量对象
+	 * 查询info表
+	 */
+	@GetMapping("/info/flowNum") 
 	@CrossOrigin(origins = "http://localhost:4200")
 	public DataFormat<Object> flowNum(@RequestParam (value = "time",required = true) String time){
 		DataFormat<Object> dataFormat = new DataFormat<Object>();
@@ -58,6 +73,12 @@ public class InfoController {
 		});
 		return dataFormat;
 	}
+	/*
+	 * 请求报文大小
+	 * @Param time:起始时间
+	 * @Return PackageNum:报文对象
+	 * 查询info表
+	 */
 	@GetMapping("/info/packageNum")
 	@CrossOrigin(origins = "http://localhost:4200")
 	public DataFormat<Object> packageNum(@RequestParam (value = "time",required = true) String time){
@@ -67,6 +88,12 @@ public class InfoController {
 		});
 		return dataFormat;
 	}
+	/*
+	 * 请求威胁数量
+	 * @Param time:起始时间
+	 * @Return ThreatNum:威胁对象
+	 * 查询info表
+	 */
 	@GetMapping("/info/threatNum")
 	@CrossOrigin(origins = "http://localhost:4200")
 	public DataFormat<Object> threatNum(){
@@ -76,6 +103,12 @@ public class InfoController {
 		dataFormat.addData(new ThreatNum(info.getTime(), info.getThreatNum(),info.getHandledNum(),info.getNotHandleNum()));
 		return dataFormat;
 	}
+	/*
+	 * 请求木马top ip出现次数
+	 * @Param n:top几
+	 * @Return IpCountView
+	 * 查询trojan表
+	 */
 	@GetMapping("/info/trojanIpCount")
 	@CrossOrigin(origins = "http://localhost:4200")
 	public DataFormat<Object> trojanIpCount(@RequestParam(value = "n",required = true)int n){
@@ -276,8 +309,17 @@ public class InfoController {
         ipCityMap.forEach((k,v)->{
         	StringBuilder builder = new StringBuilder();
         	MapView mapView = new MapView();
-        	mapView.setName(k);
-        	mapView.setValue(v.size());
+        	mapView.setName(k.replaceAll("市", ""));
+        	float size = 1.0f;
+        	if (v.size()/5.0 > 1) {
+				if (v.size() > 100) {
+					size = 20.0f;
+				}
+				else {
+					size = v.size() / 5.0f;
+				}
+			}
+        	mapView.setValue(size);
         	for (int i = 0; i < 10; i++) {
 				int max = 0;
 				int index = -1;
@@ -289,7 +331,11 @@ public class InfoController {
 					}
 				}
 				if (index != -1) {
-					builder.append(v.remove(index) + ",");
+					String string = v.remove(index);
+					builder.append(string + ",");
+					while(v.contains(string)) {
+						v.remove(string);
+					}
 				}
 			}
         	builder.deleteCharAt(builder.length()-1);
