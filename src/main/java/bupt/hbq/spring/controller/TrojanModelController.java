@@ -20,11 +20,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import bupt.hbq.spring.objects.DataFormat;
 import bupt.hbq.spring.objects.trojan.TrojanInstances;
 
+@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342"})
 @RestController
 public class TrojanModelController {
 	@SuppressWarnings("unchecked")
 	@PostMapping(value = "/torjan/model",produces = {"application/json;charset=UTF-8"})
-	@CrossOrigin("http://localhost:4200")
 	public DataFormat<Object> test(@RequestBody TrojanInstances instances){
 		RestTemplate restTemplate = new RestTemplate();
 		String url = "http://10.3.200.130:8501/v1/models/half_plus_two:predict";

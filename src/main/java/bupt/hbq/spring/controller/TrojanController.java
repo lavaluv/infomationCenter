@@ -11,6 +11,7 @@ import bupt.hbq.spring.dao.TrojanRepository;
 import bupt.hbq.spring.objects.DataFormat;
 import bupt.hbq.spring.objects.trojan.Trojan;
 import bupt.hbq.spring.service.TrojanSerch;
+@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342"})
 @RestController
 public class TrojanController {
 	private TrojanRepository trojanRespository;
@@ -18,7 +19,6 @@ public class TrojanController {
 		this.trojanRespository = trojanRespository;
 	}
 	@GetMapping("/trojan")
-	@CrossOrigin(origins = "http://localhost:4200")
 	public DataFormat<Object> trojan(@RequestParam (value = "fromTime",required = false)String fromTime,
 			@RequestParam (value = "toTime",required = false) String toTime,
 			@RequestParam (value = "page",required = true) int page,

@@ -44,6 +44,7 @@ import bupt.hbq.spring.service.IpAddressUtil;
  * @CrossOrigin用于设置跨域访问
  * @RequestParam用于设置请求字段,value为请求字段名称,required定义是否为必须字段
  */
+@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342"})
 @RestController
 public class InfoController {
 	//绑定jpa repository，用以操作数据库
@@ -65,7 +66,6 @@ public class InfoController {
 	 * 查询info表
 	 */
 	@GetMapping("/info/flowNum") 
-	@CrossOrigin(origins = "http://localhost:4200")
 	public DataFormat<Object> flowNum(@RequestParam (value = "time",required = true) String time){
 		DataFormat<Object> dataFormat = new DataFormat<Object>();
 		respository.findByTimeGreaterThan(time).forEach(info->{
@@ -80,7 +80,6 @@ public class InfoController {
 	 * 查询info表
 	 */
 	@GetMapping("/info/packageNum")
-	@CrossOrigin(origins = "http://localhost:4200")
 	public DataFormat<Object> packageNum(@RequestParam (value = "time",required = true) String time){
 		DataFormat<Object> dataFormat = new DataFormat<Object>();
 		respository.findByTimeGreaterThan(time).forEach(info->{
@@ -95,7 +94,6 @@ public class InfoController {
 	 * 查询info表
 	 */
 	@GetMapping("/info/threatNum")
-	@CrossOrigin(origins = "http://localhost:4200")
 	public DataFormat<Object> threatNum(){
 		DataFormat<Object> dataFormat = new DataFormat<Object>();
 		List<Info> list =  respository.findAll();
@@ -110,7 +108,6 @@ public class InfoController {
 	 * 查询trojan表
 	 */
 	@GetMapping("/info/trojanIpCount")
-	@CrossOrigin(origins = "http://localhost:4200")
 	public DataFormat<Object> trojanIpCount(@RequestParam(value = "n",required = true)int n){
 		DataFormat<Object> dataFormat = new DataFormat<Object>();
 		Trojan newest = trojanRepository.findFirst1ByTimeGreaterThan("0", new Sort(Direction.DESC, "time"));
@@ -147,7 +144,6 @@ public class InfoController {
 		return dataFormat;
 	}
 	@GetMapping("/info/threatLevelNum")
-	@CrossOrigin(origins = "http://localhost:4200")
 	public DataFormat<Object> threatLevelNum() {
 		DataFormat<Object> dataFormat = new DataFormat<Object>();
 		ArrayList<String> type = new ArrayList<String>();
@@ -190,7 +186,6 @@ public class InfoController {
 		return dataFormat;
 	}
     @GetMapping("/info/threatLevel")
-    @CrossOrigin(origins = "http://localhost:4200")
     public DataFormat<Object> getDomainThreadView(){
     	List<DetectHistory> histories = detectHistoryRepository.findFirst1ByDetectTimeGreaterThan(
     			"0", new Sort(Direction.DESC, "detectTime"));
@@ -242,7 +237,6 @@ public class InfoController {
         return domainThreadViewList;
     }    
     @GetMapping("/info/ipAddress")
-    @CrossOrigin(origins = "http://localhost:4200")
     public DataFormat<Object> getMapView(){
     	List<DetectHistory> histories = detectHistoryRepository.findFirst1ByDetectTimeGreaterThan(
     			"0", new Sort(Direction.DESC, "detectTime"));

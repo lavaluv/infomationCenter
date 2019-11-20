@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import bupt.hbq.spring.objects.trojan.TrojanView;
 
 @RepositoryRestResource
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342"})
 public interface TrojanViewRepository extends JpaRepository<TrojanView, Long>{
 	List<TrojanView> findByTimeGreaterThan(String time);
 }

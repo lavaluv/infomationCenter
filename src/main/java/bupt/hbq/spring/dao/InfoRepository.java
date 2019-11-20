@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import bupt.hbq.spring.objects.info.Info;
 
 @RepositoryRestResource
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342"})
 public interface InfoRepository extends JpaRepository<Info, Long> {
 	List<Info> findByTime(String time);
 	List<Info> findByTimeGreaterThan(String time);

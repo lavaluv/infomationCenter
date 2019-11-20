@@ -19,7 +19,7 @@ import lombok.val;
 
 import java.util.List;
 
-
+@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342"})
 @RestController
 public class DomainDectCotroller {
     private DomainDetectResultRepository domainDetectResultRepository;
@@ -50,7 +50,6 @@ public class DomainDectCotroller {
 //        return result;
 //    }
     @GetMapping("/history")
-    @CrossOrigin(origins = "http://localhost:4200")
     public DataFormat<Object> getAllDetectHistory(@RequestParam(value = "userId",required = true)long userId,
     		@RequestParam(value = "page",required = true)int page,
     		@RequestParam(value = "size",required = true)int size){
@@ -60,7 +59,6 @@ public class DomainDectCotroller {
             return dataFormat;
     }
     @GetMapping("/detail")
-    @CrossOrigin(origins = "http://localhost:4200")
     public DataFormat<Object> getDetectHistoryDetail(@RequestParam(value = "page",required = true)int page, 
     		@RequestParam(value = "size",required = true)int size,
     		@RequestParam(value = "fromTime",required = false)String fromTime,

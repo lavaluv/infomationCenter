@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342"})
 @RestController
 public class DomainViewController {
     private DomainDetectResultRepository domainDetectResultRepository;
@@ -33,7 +34,6 @@ public class DomainViewController {
         this.detectHistoryRepository =detectHistoryRepository;
     }
     @GetMapping("/info/dnsIpCount")
-    @CrossOrigin(origins = "http://localhost:4200")
     public DataFormat<Object> getIpCountView(@RequestParam(value = "n",required = true)int n){
     	List<DetectHistory> histories = detectHistoryRepository.findFirst1ByDetectTimeGreaterThan(
     			"0", new Sort(Direction.DESC, "detectTime"));
@@ -81,7 +81,6 @@ public class DomainViewController {
 
     }
     @GetMapping("/historyView")
-    @CrossOrigin(origins = "http://localhost:4200")
     public DataFormat<Object> getHistory(@RequestParam(value = "gap",required = true)String gap) throws Exception{
 
         long endTime = new Date().getTime();
@@ -127,7 +126,6 @@ public class DomainViewController {
         return hrlist;
     }
     @GetMapping("/countAllDomain")
-    @CrossOrigin(origins = "http://localhost:4200")
     public DataFormat<Object> countAllDomain(@RequestParam(value = "n",required = true) int n){
         List<Object[]> ddr =domainDetectResultRepository.queryTopByCountnumber(PageRequest.of(0, n)).getContent();
         DataFormat<Object> dataFormat = new DataFormat<>();

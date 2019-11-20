@@ -12,7 +12,7 @@ import bupt.hbq.spring.objects.dns.DetectHistory;
 import java.util.List;
 
 @RepositoryRestResource
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342"})
 public interface DetectHistoryRepository extends JpaRepository<DetectHistory, Long> {
 
     List<DetectHistory> findDetectHistoriesByUserId(long userid);

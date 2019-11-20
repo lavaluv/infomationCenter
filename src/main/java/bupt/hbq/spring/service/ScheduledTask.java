@@ -51,7 +51,6 @@ public class ScheduledTask {
 		System.out.println("dns "+DATE_FORMAT.format(new Date()));
 		File file = new File(DNS_TEST_FILE);
 		DnsInfo dnsInfo = new DnsInfo();
-		dnsInfo.setFlowNum(file.length());
 		dnsInfo.setTime(String.valueOf(System.currentTimeMillis()));
 		dnsThreadPool.submit(()->{
 			dnsPcap.pcapToCsv(file,dnsInfo);
@@ -62,7 +61,6 @@ public class ScheduledTask {
 		System.out.println("trojan "+DATE_FORMAT.format(new Date()));
 		File file = new File(TROJAN_TEST_FILE);
 		TrojanInfo trojanInfo = new TrojanInfo();
-		trojanInfo.setFlowNum(file.length());
 		trojanInfo.setTime(String.valueOf(System.currentTimeMillis()));
 		trojanThreadPool.submit(()->{
 			trojanPcap.trojanPcapToPng(file,trojanInfo);

@@ -12,6 +12,7 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeoutException;
 
 import org.pcap4j.core.NotOpenException;
@@ -78,6 +79,7 @@ public class DNSPcap {
 		    HashMap<String, HashSet<String>> srcIpDesIp = new HashMap<String, HashSet<String>>();
 		    HashMap<String, HashSet<String>> city = new HashMap<String, HashSet<String>>();
 		    int packetNum = 0;
+		    int flowNum = 0;
 		    String outFileName = PCAP_OUT+pcapFile.getName().split("\\.")[0]+".csv";
 			CsvWriter csvWriter = new CsvWriter(outFileName, ',',Charset.forName("GBK"));
 			//String[] header = {"name","ip_nums","asn_nums","country_nums","Querty_time","Message Size"};
@@ -88,7 +90,9 @@ public class DNSPcap {
 		    while(true) {
 		      try {
 		        Packet packet = handle.getNextPacketEx();
+		        if(new Random().nextInt(100) > 10) {
 		        packetNum++;
+		        flowNum += packet.length();
 		        Timestamp ts = handle.getTimestamp();
 		        if (packet.contains(IpPacket.class)) {
 					IpPacket ipPacket = packet.get(IpPacket.class);
@@ -221,6 +225,7 @@ public class DNSPcap {
 						}
 					}
 				}
+		        }
 		      	} catch (TimeoutException e) {
 		      		System.out.println("Time out");
 		      		break;
@@ -261,6 +266,7 @@ public class DNSPcap {
 			} finally {
 				csvWriter.close();
 				dnsInfo.setPackageNum(packetNum);
+				dnsInfo.setFlowNum(flowNum);
 				register(dnsInfo);
 				registerDetection(outFileName,srcIpDesIp,city,dnsInfo);
 				end = System.currentTimeMillis();

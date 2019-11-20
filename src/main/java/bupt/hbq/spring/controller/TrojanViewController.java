@@ -13,6 +13,7 @@ import bupt.hbq.spring.dao.TrojanViewRepository;
 import bupt.hbq.spring.objects.DataFormat;
 import bupt.hbq.spring.objects.trojan.TrojanViewPort;
 
+@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342"})
 @RestController
 public class TrojanViewController {
 	private TrojanViewRepository trojanViewRespository;
@@ -22,7 +23,6 @@ public class TrojanViewController {
 		this.trojanRepository = trojanRepository;
 	}
 	@GetMapping("/trojan/view/flow")
-	@CrossOrigin(origins = "http://localhost:4200")
 	public DataFormat<Object> flowView(@RequestParam (value = "time",required = true) String time){
 		DataFormat<Object> dataFormat = new DataFormat<Object>();
 		trojanViewRespository.findByTimeGreaterThan(time).forEach(view->{
@@ -31,7 +31,6 @@ public class TrojanViewController {
 		return dataFormat;
 	}
 	@GetMapping("/trojan/view/srcPort")
-	@CrossOrigin(origins = "http://localhost:4200")
 	public DataFormat<Object> srcPortView(@RequestParam (value = "top",required = true)int top){
 		DataFormat<Object> dataFormat = new DataFormat<Object>();
 		List<Object[]> srcList = trojanRepository.findsrcPortCount(PageRequest.of(0, top)).getContent();
@@ -50,7 +49,6 @@ public class TrojanViewController {
 		return dataFormat;
 	}
 	@GetMapping("/trojan/view/desPort")
-	@CrossOrigin(origins = "http://localhost:4200")
 	public DataFormat<Object> desPortView(@RequestParam (value = "top",required = true)int top){
 		DataFormat<Object> dataFormat = new DataFormat<Object>();
 		List<Object[]> desList = trojanRepository.finddesPortCount(PageRequest.of(0, top)).getContent();

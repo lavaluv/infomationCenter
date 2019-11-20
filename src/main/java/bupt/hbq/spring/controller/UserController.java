@@ -11,6 +11,7 @@ import bupt.hbq.spring.objects.DataFormat;
 import bupt.hbq.spring.objects.RespondValue;
 import bupt.hbq.spring.objects.User;
 
+@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342"})
 @RestController
 public class UserController {
 	private UserRepository userRespository;
@@ -18,7 +19,6 @@ public class UserController {
 		this.userRespository = userRespository;
 	}
 	@RequestMapping(value = "/login",produces = {"application/json;charset=UTF-8"},method = RequestMethod.POST)
-	@CrossOrigin(origins = "http://localhost:4200")
 	public DataFormat<Object> checkUser(@RequestBody User user){
 		DataFormat<Object> dataFormat = new DataFormat<Object>();
 		RespondValue respondValue = new RespondValue();

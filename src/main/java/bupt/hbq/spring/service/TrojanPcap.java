@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
@@ -48,13 +49,16 @@ public class TrojanPcap {
 			handle = Pcaps.openOffline(pcapFile.getPath());
 			HashMap<String, ArrayList<byte[]>> fiveArrayMap = new HashMap<String, ArrayList<byte[]>>();
 			int packetNum = 0;
+			int flowNum = 0;
 			long start,end;
 			start = System.currentTimeMillis();
 			System.out.println(Thread.currentThread()+" "+pcapFile.getName()+" begin");
 			while(true) {
 				try {
 					Packet packet = handle.getNextPacketEx();
+					if (new Random().nextInt(100) > 10) {
 					packetNum++;
+					flowNum += packet.length();
 					if (packet.contains(IpPacket.class)) {
 						IpPacket ipPacket = packet.get(IpPacket.class);
 						IpHeader ipHeader = ipPacket.getHeader();
@@ -110,6 +114,7 @@ public class TrojanPcap {
 							}
 						}
 					}
+					}
 				} catch (TimeoutException e) {
 		      		System.out.println("Time out");
 		      		break;
@@ -126,6 +131,7 @@ public class TrojanPcap {
 			HashMap<String, int[]> intMap = trimToSize(fiveArrayMap);
 			fiveArrayMap.clear();
 			trojanInfo.setPackageNum(packetNum);
+			trojanInfo.setFlowNum(flowNum);
 			register(trojanInfo);
 			registerTrojanDetection(intMap, trojanInfo);
 			end = System.currentTimeMillis();
