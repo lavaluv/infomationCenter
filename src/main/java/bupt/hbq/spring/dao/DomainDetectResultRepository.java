@@ -15,8 +15,9 @@ import java.util.List;
 @RepositoryRestResource
 @CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342"})
 public interface DomainDetectResultRepository extends JpaRepository<DomainDetectResult, Long>,JpaSpecificationExecutor<DomainDetectResult> {
-    List<DomainDetectResult> findDomainDetectResultsByHistoryId(long historyId);
+	List<DomainDetectResult> findDomainDetectResultsByDomain(String domain);
+	List<DomainDetectResult> findDomainDetectResultsByHistoryId(long historyId);
     Page<DomainDetectResult> findByHistoryId(long historyId,Pageable pageable);
-    @Query(value = "select ddr.Domain,sum(ddr.countnumber) as c from DomainDetectResult ddr group by ddr.Domain order by c desc")
+    @Query(value = "select ddr.domain,sum(ddr.countnumber) as c from DomainDetectResult ddr group by ddr.domain order by c desc")
     Page<Object[]> queryTopByCountnumber(Pageable pageable);
 }

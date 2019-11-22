@@ -25,10 +25,15 @@ import bupt.hbq.spring.dao.TrojanInfoRepository;
 import bupt.hbq.spring.objects.info.DnsInfo;
 import bupt.hbq.spring.objects.info.Info;
 import bupt.hbq.spring.objects.info.TrojanInfo;
-
+/*
+ * 定时任务实现
+ * 1.dns pcap文件定时处理
+ * 2.trojan pcap文件定时处理
+ */
 @Service
 public class ScheduledTask {
 	private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
+	//pcap文件相对jar包的路径(项目启动时)
 	private final static String DNS_FILE_PATH="dataInput/dns/shell";
 	private final static String TROJAN_FILE_PATH = "dataInput/trojan/shell";
 	private final static String DNS_TEST_FILE = "dataInput/dns/test/test.pcap";

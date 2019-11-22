@@ -14,7 +14,7 @@ import javax.persistence.Id;
 public class DomainDetectResult {
     @Id @GeneratedValue
     private long rId;
-    private String Domain;
+    private String domain;
     @Column(columnDefinition = "text")
     private String ip;
     private int countnumber;
@@ -30,8 +30,8 @@ public class DomainDetectResult {
     public DomainDetectResult(){
 
     }
-    public DomainDetectResult(String Domain,String ip,int countnumber){
-        this.Domain = Domain;
+    public DomainDetectResult(String domain,String ip,int countnumber){
+        this.domain = domain;
         this.ip = ip;
         this.countnumber = countnumber;
     }
@@ -91,8 +91,8 @@ public class DomainDetectResult {
         this.citylist = citylist;
     }
 
-    public DomainDetectResult(String Domain, String ip){
-        this.Domain = Domain;
+    public DomainDetectResult(String domain, String ip){
+        this.domain = domain;
         this.ip = ip;
 
     }
@@ -113,8 +113,8 @@ public class DomainDetectResult {
     }
 
     private long historyId;
-    public DomainDetectResult(String Domain,long historyId){
-        this.Domain = Domain;
+    public DomainDetectResult(String domain,long historyId){
+        this.domain = domain;
         this.historyId = historyId;
     }
 
@@ -123,11 +123,11 @@ public class DomainDetectResult {
     }
 
     public String getDomain() {
-        return Domain;
+        return domain;
     }
 
     public void setDomain(String domain) {
-        Domain = domain;
+        this.domain = domain;
     }
 
     public String getIp() {

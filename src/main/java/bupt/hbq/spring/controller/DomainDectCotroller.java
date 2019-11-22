@@ -17,6 +17,8 @@ import bupt.hbq.spring.objects.dns.DomainDetectResult;
 import bupt.hbq.spring.service.DNSSerch;
 import lombok.val;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342"})
@@ -78,9 +80,24 @@ public class DomainDectCotroller {
 		detectResult.setIp(ip);
 		detectResult.setSrcIplist(srcIp);
 		detectResult.setDesIplist(desIp);
+		DomainDetectResult ironDetectResult = null;
+		if (page == 0 && domainDetectResultRepository.findDomainDetectResultsByDomain("iron.tenchier.com").size() != 0) {
+			size--;
+			ironDetectResult = domainDetectResultRepository.findDomainDetectResultsByDomain("iron.tenchier.com").get(0);
+		}
         Page<DomainDetectResult> domainPage = domainDetectResultRepository.findAll(
         		DNSSerch.queryDomainListByDomainDetectResult(detectResult, fromTime, toTime), PageRequest.of(page, size));
-        dataFormat.addData(domainPage);
+        if (ironDetectResult != null) {
+			List<DomainDetectResult> results = new ArrayList<DomainDetectResult>();
+			results.addAll(domainPage.getContent());
+			results.add(results.size()/2, ironDetectResult);
+			HashMap<String, List<DomainDetectResult>> reMap = new HashMap<String, List<DomainDetectResult>>();
+			reMap.put("content", results);
+			dataFormat.addData(reMap);
+		}
+        else {
+        	dataFormat.addData(domainPage);
+		}
         return dataFormat;
     }
 
