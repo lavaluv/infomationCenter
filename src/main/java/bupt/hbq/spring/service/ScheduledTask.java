@@ -51,7 +51,7 @@ public class ScheduledTask {
 		this.trojanInfoRepository = trojanInfoRepository;
 		this.trojanPcap = trojanPcap;
 	}
-	@Scheduled(fixedDelay = 300000)
+//	@Scheduled(fixedDelay = 300000)
 	public void testDns() {
 		System.out.println("dns "+DATE_FORMAT.format(new Date()));
 		File file = new File(DNS_TEST_FILE);
@@ -61,7 +61,7 @@ public class ScheduledTask {
 			dnsPcap.pcapToCsv(file,dnsInfo);
 		});
 	}
-	@Scheduled(fixedDelay = 300000)
+	@Scheduled(fixedDelay = 3600000)
 	public void testTrojan() {
 		System.out.println("trojan "+DATE_FORMAT.format(new Date()));
 		File file = new File(TROJAN_TEST_FILE);
@@ -71,7 +71,7 @@ public class ScheduledTask {
 			trojanPcap.trojanPcapToPng(file,trojanInfo);
 		});
 	}
-//	@Scheduled(fixedDelay = 3600000)
+	@Scheduled(fixedDelay = 3600000)
 	public void dnsInput() {
 		System.out.println("dns "+DATE_FORMAT.format(new Date()));
 		File file = new File(DNS_FILE_PATH);
@@ -111,13 +111,13 @@ public class ScheduledTask {
 									}
 								});
 								for (File in : dirFiles) {
-									if (in.isFile() && !in.getName().split("\\.")[0].equals("")) {
-										DateFormat fileFormat = new SimpleDateFormat("yyyyMMddHH");
-										Date hourDate = fileFormat.parse(in.getName().split("\\.")[0]);
+									String fileName = in.getName().split("\\.")[0];
+									if (in.isFile() && !fileName.equals("") && !fileName.contains("temp")) {
+										DateFormat fileFormat = new SimpleDateFormat("yyyyMMddHHmm");
+										Date hourDate = fileFormat.parse(fileName);
 										if (newest.size() == 0 || Long.valueOf(newest.get(0).getTime()) < hourDate.getTime()) {
 											//pcap to csv
 											DnsInfo dnsInfo = newest.size() == 0?new DnsInfo():newest.get(0);
-											dnsInfo.setFlowNum(in.length());
 											dnsInfo.setTime(String.valueOf(hourDate.getTime()));
 											dnsThreadPool.submit(()->{
 												dnsPcap.pcapToCsv(in,dnsInfo);
@@ -129,7 +129,7 @@ public class ScheduledTask {
 						}
 					} catch (ParseException e1) {
 						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						System.out.println("file name parse err");
 					}
 				}
 			}
@@ -181,7 +181,6 @@ public class ScheduledTask {
 										if (newest.size() == 0 || Long.valueOf(newest.get(0).getTime()) < hourDate.getTime()) {
 											//pcap to csv
 											TrojanInfo trojanInfo = newest.size() == 0?new TrojanInfo():newest.get(0);
-											trojanInfo.setFlowNum(in.length());
 											trojanInfo.setTime(String.valueOf(hourDate.getTime()));
 											trojanThreadPool.submit(()->{
 												trojanPcap.trojanPcapToPng(in,trojanInfo);

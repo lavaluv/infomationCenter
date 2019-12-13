@@ -105,7 +105,7 @@ public class TrojanDetectionEventListener {
 		trojanViewRepository.save(trojanView);
 		List<Info> infos = infoRepository.findByTime(trojanDetectionEvent.getTrojanInfo().getTime());
 		if (infos.size() != 0) {
-			infoRepository.updateThreatNumAndNotHandleNumByTime(infos.get(0).getThreatNum()+trojans.size(),
+			infoRepository.updateThreatNumAndNotHandleNumByTime(infos.get(0).getThreatNum()+1,
 					infos.get(0).getNotHandleNum()+1, infos.get(0).getTime());
 		}
 		System.out.println("Trojan detection end");

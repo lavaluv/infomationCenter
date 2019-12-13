@@ -45,7 +45,7 @@ public class DNSSerch {
 					predicates.add(builder.like(root.get("desIplist"), "%" + desIpString + "%"));
 				}
 				if (hostName != null && hostName != "") {
-					predicates.add(builder.like(root.get("Domain"), "%" + hostName + "%"));
+					predicates.add(builder.like(root.get("domain"), "%" + hostName + "%"));
 				}
 				Predicate[] predicateAll = new Predicate[predicates.size()];
 				return builder.and(predicates.toArray(predicateAll));

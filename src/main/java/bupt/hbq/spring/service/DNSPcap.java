@@ -90,7 +90,6 @@ public class DNSPcap {
 		    while(true) {
 		      try {
 		        Packet packet = handle.getNextPacketEx();
-		        if(new Random().nextInt(100) > 10) {
 		        packetNum++;
 		        flowNum += packet.length();
 		        Timestamp ts = handle.getTimestamp();
@@ -225,7 +224,6 @@ public class DNSPcap {
 						}
 					}
 				}
-		        }
 		      	} catch (TimeoutException e) {
 		      		System.out.println("Time out");
 		      		break;

@@ -51,7 +51,7 @@ public class HostDetectionEventListener {
 			System.out.println("DNS detection end");
 			List<Info> info = infoRepository.findByTime(hostDetectionEvent.getDnsInfo().getTime());
 			if (info.size() != 0) {
-				infoRepository.updateThreatNumAndNotHandleNumByTime(info.get(0).getThreatNum()+result.size(),
+				infoRepository.updateThreatNumAndNotHandleNumByTime(info.get(0).getThreatNum()+1,
 						info.get(0).getNotHandleNum()+1, info.get(0).getTime());
 			}
 			domainDetectResultRepository.saveAll(result);

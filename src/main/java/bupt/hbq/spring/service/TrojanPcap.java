@@ -34,7 +34,9 @@ import bupt.hbq.spring.objects.info.TrojanInfo;
 import org.pcap4j.packet.IpPacket.IpHeader;
 @Service
 public class TrojanPcap {
+	//截取的流量大小（字节）
 	private static final int PACKET_SIZE = 784;
+	//注册事件
 	@Autowired
 	private ApplicationContext applicationContext;
 	public void register(TrojanInfo trojanInfo) {
@@ -47,6 +49,7 @@ public class TrojanPcap {
 		PcapHandle handle = null;
 		try {
 			handle = Pcaps.openOffline(pcapFile.getPath());
+			//五元组对应的数据
 			HashMap<String, ArrayList<byte[]>> fiveArrayMap = new HashMap<String, ArrayList<byte[]>>();
 			int packetNum = 0;
 			int flowNum = 0;

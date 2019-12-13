@@ -26,7 +26,6 @@ public class ModelInvoker {
                 is = ModelInvoker.class.getClassLoader().getResourceAsStream(pmmlFileName);
                 if(is==null){
                     is = new FileInputStream(pmmlFileName);
-                    System.out.println(pmmlFileName);
                 }
                 pmml = PMMLUtil.unmarshal(is);
             }

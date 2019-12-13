@@ -80,24 +80,22 @@ public class DomainDectCotroller {
 		detectResult.setIp(ip);
 		detectResult.setSrcIplist(srcIp);
 		detectResult.setDesIplist(desIp);
-		DomainDetectResult ironDetectResult = null;
-		if (page == 0 && domainDetectResultRepository.findDomainDetectResultsByDomain("iron.tenchier.com").size() != 0) {
-			size--;
-			ironDetectResult = domainDetectResultRepository.findDomainDetectResultsByDomain("iron.tenchier.com").get(0);
-		}
+//		DomainDetectResult ironDetectResult = null;
+//		if (page == 0 && domainDetectResultRepository.findDomainDetectResultsByDomain("iron.tenchier.com").size() != 0) {
+//			size--;
+//			ironDetectResult = domainDetectResultRepository.findDomainDetectResultsByDomain("iron.tenchier.com").get(0);
+//		}
         Page<DomainDetectResult> domainPage = domainDetectResultRepository.findAll(
         		DNSSerch.queryDomainListByDomainDetectResult(detectResult, fromTime, toTime), PageRequest.of(page, size));
-        if (ironDetectResult != null) {
-			List<DomainDetectResult> results = new ArrayList<DomainDetectResult>();
-			results.addAll(domainPage.getContent());
-			results.add(results.size()/2, ironDetectResult);
-			HashMap<String, List<DomainDetectResult>> reMap = new HashMap<String, List<DomainDetectResult>>();
-			reMap.put("content", results);
-			dataFormat.addData(reMap);
-		}
-        else {
-        	dataFormat.addData(domainPage);
-		}
+//        if (ironDetectResult != null) {
+//			List<DomainDetectResult> results = new ArrayList<DomainDetectResult>();
+//			results.addAll(domainPage.getContent());
+//			results.add(results.size()/2, ironDetectResult);
+//			HashMap<String, List<DomainDetectResult>> reMap = new HashMap<String, List<DomainDetectResult>>();
+//			reMap.put("content", results);
+//			dataFormat.addData(reMap);
+//		}
+        dataFormat.addData(domainPage);
         return dataFormat;
     }
 
