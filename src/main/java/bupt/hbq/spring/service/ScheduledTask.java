@@ -29,15 +29,19 @@ import bupt.hbq.spring.objects.info.TrojanInfo;
  * 定时任务实现
  * 1.dns pcap文件定时处理
  * 2.trojan pcap文件定时处理
+ * fixedDelay用于设定处理周期，周期应与数据捕获周期（shell脚本周期）相同
+ * test开头的函数为测试静态文件的函数，不可与相应的处理函数同时启用
  */
 @Service
 public class ScheduledTask {
 	private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
-	//pcap文件相对jar包的路径(项目启动时)
+	//pcap文件相对jar包的路径(IDE启动时为项目根目录)
 	private final static String DNS_FILE_PATH="dataInput/dns/shell";
 	private final static String TROJAN_FILE_PATH = "dataInput/trojan/shell";
+	//test文件用于测试
 	private final static String DNS_TEST_FILE = "dataInput/dns/test/test.pcap";
 	private final static String TROJAN_TEST_FILE = "dataInput/trojan/test/test.pcap";
+	//单线程池用于异步处理
 	private static ExecutorService dnsThreadPool = Executors.newSingleThreadExecutor();
 	private static ExecutorService trojanThreadPool = Executors.newSingleThreadExecutor();
 	private DnsInfoRepository dnsInfoRespository;
@@ -71,11 +75,14 @@ public class ScheduledTask {
 			trojanPcap.trojanPcapToPng(file,trojanInfo);
 		});
 	}
+	//dns pcap 文件输入
 	@Scheduled(fixedDelay = 3600000)
 	public void dnsInput() {
 		System.out.println("dns "+DATE_FORMAT.format(new Date()));
+		//读取路径下所有的文件和目录
 		File file = new File(DNS_FILE_PATH);
 		File[] files = file.listFiles();
+		//按日期名字从小到大排序
 		if (files != null) {
 			Arrays.sort(files, new Comparator<File>() {
 				@Override
@@ -86,10 +93,13 @@ public class ScheduledTask {
 				}
 			});
 			for (int i = 0; i < files.length; i++) {
+				//为目录时
 				if(files[i].isDirectory()){
 					DateFormat dayFormat = new SimpleDateFormat("yyyyMMdd");
 					try {
+						//从目录名获取捕获日期
 						Date dayDate = dayFormat.parse(files[i].getName());
+						//查询数据库获取最新一条数据
 						List<DnsInfo> newest = dnsInfoRespository.findFirst1ByTimeGreaterThan("0",
 								new Sort(Direction.DESC,"time"));
 						if (newest.size() != 0) {
@@ -98,9 +108,12 @@ public class ScheduledTask {
 						else {
 							System.out.println("info is empty");
 						}
+						//当数据库没有数据或最新数据的日期小于等于捕获日期
 						if (newest.size() == 0 || Long.valueOf(newest.get(0).getTime()) < (dayDate.getTime() + 86400000)) {
 							File dirFile = new File(DNS_FILE_PATH+"/"+files[i].getName());
+							//获取该目录下的所有文件
 							File[] dirFiles = dirFile.listFiles();
+							//按时间从小到大排序
 							if (dirFiles != null) {
 								Arrays.sort(dirFiles, new Comparator<File>() {
 									@Override
@@ -110,11 +123,15 @@ public class ScheduledTask {
 										return s1.compareTo(s2);
 									}
 								});
+								//遍历每个文件
 								for (File in : dirFiles) {
 									String fileName = in.getName().split("\\.")[0];
+									//当文件名不为空且不含temp字段时（temp字段代表正在捕获中的文件）
 									if (in.isFile() && !fileName.equals("") && !fileName.contains("temp")) {
 										DateFormat fileFormat = new SimpleDateFormat("yyyyMMddHHmm");
+										//从文件明获取捕获时间
 										Date hourDate = fileFormat.parse(fileName);
+										//当数据库没有数据或最新数据的时间小于捕获时间
 										if (newest.size() == 0 || Long.valueOf(newest.get(0).getTime()) < hourDate.getTime()) {
 											//pcap to csv
 											DnsInfo dnsInfo = newest.size() == 0?new DnsInfo():newest.get(0);
