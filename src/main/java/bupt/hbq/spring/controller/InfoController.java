@@ -44,7 +44,7 @@ import bupt.hbq.spring.service.IpAddressUtil;
  * @CrossOrigin用于设置跨域访问
  * @RequestParam用于设置请求字段,value为请求字段名称,required定义是否为必须字段
  */
-@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342"})
+@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342","http://localhost:8080"})
 @RestController
 public class InfoController {
 	//绑定jpa repository，用以操作数据库

@@ -12,7 +12,6 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeoutException;
 
 import org.pcap4j.core.NotOpenException;
@@ -45,18 +44,25 @@ import com.maxmind.geoip2.model.CountryResponse;
 import bupt.hbq.spring.event.DnsPcapEvent;
 import bupt.hbq.spring.event.HostDetectionEvent;
 import bupt.hbq.spring.objects.info.DnsInfo;
+/*
+ * dns pcap文件预处理为需要的特征
+ */
 @Service
 public class DNSPcap {
-	private static final String TEST_STRING = "src/main/resources/";
+	//输出的csv文件相对路径
 	private static final String PCAP_OUT = "dataInput/dns/csv/";
+	//静态GeoLite数据库地址
 	private static final String COUNTRY_DATABASE = "dataInput/dns/geoIP/GeoLite2-Country.mmdb";
 	private static final String ASN_DATABASE = "dataInput/dns/geoIP/GeoLite2-ASN.mmdb";
 	private static final String CITY_DATABASE = "dataInput/dns/geoIP/GeoLite2-City.mmdb";
+	//注入上下文用于时间发布
 	@Autowired
 	private ApplicationContext applicationContext;
+	//发布更新dns info事件
 	public void register(DnsInfo dnsInfo) {
 		applicationContext.publishEvent(new DnsPcapEvent(this, dnsInfo));
 	}
+	//发布域名监测事件
 	public void registerDetection(String csvString,HashMap<String, HashSet<String>> srcIpDesIp, HashMap<String, HashSet<String>> city, 
 			DnsInfo dnsInfo) {
 		applicationContext.publishEvent(new HostDetectionEvent(this, csvString,srcIpDesIp,city,dnsInfo));
@@ -64,6 +70,7 @@ public class DNSPcap {
 	public void pcapToCsv(File pcapFile,DnsInfo dnsInfo){
 	    PcapHandle handle = null;
 	    try {
+	    	//调用pcap4j库读取pcap
 			handle = Pcaps.openOffline(pcapFile.getPath());
 			File countryData = new File(COUNTRY_DATABASE);
 			DatabaseReader countryReader = new DatabaseReader.Builder(countryData).build();

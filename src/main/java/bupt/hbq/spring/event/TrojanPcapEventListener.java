@@ -44,12 +44,12 @@ public class TrojanPcapEventListener {
 			info.setThreatNum(newest.get(0).getThreatNum());
 			infoRepository.save(info);
 		}
-		else if(newest.get(0).getTime().compareTo(trojanInfo.getTime()) == 0){
+		else if(newest.get(0).getTime().compareTo(trojanInfo.getTime()) >= 0){
 			System.out.println("info update");
 			infoRepository.updateFlowNumAndPackageNumByTime(
 					trojanInfo.getFlowNum()+newest.get(0).getFlowNum(), 
 					trojanInfo.getPackageNum()+newest.get(0).getPackageNum(), 
-					trojanInfo.getTime());
+					newest.get(0).getTime());
 		}
 	}
 }

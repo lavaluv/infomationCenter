@@ -13,7 +13,7 @@ import bupt.hbq.spring.objects.dns.DomainDetectResult;
 import java.util.List;
 
 @RepositoryRestResource
-@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342"})
+@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342","http://localhost:8080"})
 public interface DomainDetectResultRepository extends JpaRepository<DomainDetectResult, Long>,JpaSpecificationExecutor<DomainDetectResult> {
 	List<DomainDetectResult> findDomainDetectResultsByDomain(String domain);
 	List<DomainDetectResult> findDomainDetectResultsByHistoryId(long historyId);

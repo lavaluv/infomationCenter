@@ -13,7 +13,7 @@ import bupt.hbq.spring.dao.TrojanViewRepository;
 import bupt.hbq.spring.objects.DataFormat;
 import bupt.hbq.spring.objects.trojan.TrojanViewPort;
 
-@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342"})
+@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342","http://localhost:8080"})
 @RestController
 public class TrojanViewController {
 	private TrojanViewRepository trojanViewRespository;

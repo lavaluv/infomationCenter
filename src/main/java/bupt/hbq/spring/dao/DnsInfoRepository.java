@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import bupt.hbq.spring.objects.info.DnsInfo;
 
 @RepositoryRestResource
-@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342"})
+@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342","http://localhost:8080"})
 public interface DnsInfoRepository extends JpaRepository<DnsInfo, Long>{
 	List<DnsInfo> findFirst1ByTimeGreaterThan(String time,Sort sort);
 }

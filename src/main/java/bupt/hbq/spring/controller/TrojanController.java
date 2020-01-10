@@ -11,7 +11,7 @@ import bupt.hbq.spring.dao.TrojanRepository;
 import bupt.hbq.spring.objects.DataFormat;
 import bupt.hbq.spring.objects.trojan.Trojan;
 import bupt.hbq.spring.service.TrojanSerch;
-@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342"})
+@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342","http://localhost:8080"})
 @RestController
 public class TrojanController {
 	private TrojanRepository trojanRespository;

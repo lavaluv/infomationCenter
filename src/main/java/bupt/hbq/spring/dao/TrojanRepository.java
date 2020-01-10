@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import bupt.hbq.spring.objects.trojan.Trojan;
 
 @RepositoryRestResource
-@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342"})
+@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342","http://localhost:8080"})
 public interface TrojanRepository extends JpaRepository<Trojan, Long>,JpaSpecificationExecutor<Trojan>,CrudRepository<Trojan, Long>{
 	Trojan findFirst1ByTimeGreaterThan(String time,Sort sort);
 	List<Trojan> findByTime(String time);

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import bupt.hbq.spring.objects.User;
 
 @RepositoryRestResource
-@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342"})
+@CrossOrigin(origins = {"http://localhost:4200","http://localhost:63342","http://localhost:8080"})
 public interface UserRepository extends JpaRepository<User, Long>{
 	List<User> findByNameAndPassword(String name,String password);
 }

@@ -44,12 +44,12 @@ public class DnsPcapEventListener {
 			info.setThreatNum(newest.get(0).getThreatNum());
 			infoRespository.save(info);
 		}
-		else if(newest.get(0).getTime().compareTo(dnsInfo.getTime()) == 0){
+		else if(newest.get(0).getTime().compareTo(dnsInfo.getTime()) >= 0){
 			System.out.println("info update");
 			infoRespository.updateFlowNumAndPackageNumByTime(
 					dnsInfo.getFlowNum()+newest.get(0).getFlowNum(), 
 					dnsInfo.getPackageNum()+newest.get(0).getPackageNum(), 
-					dnsInfo.getTime());
+					newest.get(0).getTime());
 		}
 	}
 }

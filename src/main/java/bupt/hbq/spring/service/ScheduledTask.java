@@ -1,7 +1,6 @@
 package bupt.hbq.spring.service;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -12,22 +11,18 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.pcap4j.core.NotOpenException;
-import org.pcap4j.core.PcapNativeException;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import bupt.hbq.spring.dao.DnsInfoRepository;
-import bupt.hbq.spring.dao.InfoRepository;
 import bupt.hbq.spring.dao.TrojanInfoRepository;
 import bupt.hbq.spring.objects.info.DnsInfo;
-import bupt.hbq.spring.objects.info.Info;
 import bupt.hbq.spring.objects.info.TrojanInfo;
 /*
  * 定时任务实现
- * 1.dns pcap文件定时处理
+ * 1.dns pcap文件定时处理 
  * 2.trojan pcap文件定时处理
  * fixedDelay用于设定处理周期，周期应与数据捕获周期（shell脚本周期）相同
  * test开头的函数为测试静态文件的函数，不可与相应的处理函数同时启用
@@ -145,7 +140,6 @@ public class ScheduledTask {
 							}
 						}
 					} catch (ParseException e1) {
-						// TODO Auto-generated catch block
 						System.out.println("file name parse err");
 					}
 				}

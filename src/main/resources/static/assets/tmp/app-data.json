@@ -1,0 +1,52 @@
+{
+  "app": {
+    "name": "THFD",
+    "description": "Ng-zorro admin panel front-end framework"
+  },
+  "user": {
+    "name": "Admin",
+    "avatar": "./assets/bupt.jpg",
+    "email": "bupt@edu.com"
+  },
+  "menu": [
+    {
+      "children": [
+        {
+          "text": "首页",
+          "link": "/dashboard/first",
+          "i18n": "menu.first.page",
+          "icon": "anticon-dashboard"
+        },
+        {
+          "text": "木马检测",
+          "i18n": "menu.trojans.detection",
+          "icon": "anticon-bulb",
+          "children": [
+            {
+              "text": "木马流量视图",
+              "link": "/horse/flowView",
+              "i18n": "menu.trojan.horse.flow_view"
+            },
+            {
+              "text": "木马活动",
+              "link": "/horse/activite",
+              "i18n": "menu.trojan.horse.activities"
+            }
+          ]
+        },
+        {
+          "text": "域名检测",
+          "i18n": "menu.domain_name.detection",
+          "icon": "anticon-rocket",
+          "children": [
+            {
+              "text": "检测历史",
+              "link": "/dns/history",
+              "i18n": "menu.detection.history"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
