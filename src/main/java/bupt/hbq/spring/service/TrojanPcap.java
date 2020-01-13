@@ -51,8 +51,8 @@ public class TrojanPcap {
 			handle = Pcaps.openOffline(pcapFile.getPath());
 			//五元组对应的数据
 			HashMap<String, ArrayList<byte[]>> fiveArrayMap = new HashMap<String, ArrayList<byte[]>>();
-			int packetNum = 0;
-			int flowNum = 0;
+			long packetNum = 0;
+			long flowNum = 0;
 			long start,end;
 			start = System.currentTimeMillis();
 			System.out.println(Thread.currentThread()+" "+pcapFile.getName()+" begin");

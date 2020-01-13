@@ -85,8 +85,8 @@ public class DNSPcap {
 		    HashMap<String, HashSet<String>> countryMap = new HashMap<String, HashSet<String>>();
 		    HashMap<String, HashSet<String>> srcIpDesIp = new HashMap<String, HashSet<String>>();
 		    HashMap<String, HashSet<String>> city = new HashMap<String, HashSet<String>>();
-		    int packetNum = 0;
-		    int flowNum = 0;
+		    long packetNum = 0;
+		    long flowNum = 0;
 		    String outFileName = PCAP_OUT+pcapFile.getName().split("\\.")[0]+".csv";
 			CsvWriter csvWriter = new CsvWriter(outFileName, ',',Charset.forName("GBK"));
 			//String[] header = {"name","ip_nums","asn_nums","country_nums","Querty_time","Message Size"};
