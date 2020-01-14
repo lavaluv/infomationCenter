@@ -5,7 +5,7 @@ import java.awt.image.Raster;
 import java.io.File;
 
 import javax.imageio.ImageIO;
-
+//未使用，仅供测试
 public class ImageHandler {
 	public static int[] imageToDoubleArray(String imagePath) {
 		try {

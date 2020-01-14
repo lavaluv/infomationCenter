@@ -1,15 +1,23 @@
 #!/bin/bash
-source ~/.bash_profile
-dirNum=$(ls -l |grep "^d"|wc -l)
-echo $dirNum
-if [[ "$dirNum"<7 ]]; then
+source /etc/profile
+work_path=$(dirname $(readlink -f $0))
+dirNum=$(ls -l $work_path|grep "^d"|wc -l)
+if [ "$dirNum" -lt 7 ]; 
+then
 	day=$(date "+%Y%m%d")
-	if [ ! -d "$day" ]; then
- 		mkdir -p $day
+	dirName=$work_path"/"$day
+	if [ ! -d "$dirName" ]; then
+ 		mkdir -p $dirName
+		sudo chmod 777 -R $dirName
  	fi
-	time=$(date "+%Y%m%d%H")
-	work_path=$(dirname $(readlink -f $0))
-	fileName=$work_path"/"$day"/"$time".pcap"
+	time=$(date "+%Y%m%d%H%M")
+	fileName=$dirName"/"$time".pcap"
+	tempName=$dirName"/"$time"_temp.pcap"
 	echo $fileName
-	tshark -a duration:30 -w $fileName -F pcap -f 'port 53'
+	sudo tshark -a duration:3600 -w $tempName -F pcap -f 'port 53'
+	sudo chmod 777 $tempName
+	sudo mv $tempName $fileName
+else
+	rmFileName=$(ls $work_path|head -1)
+	sudo rm -rf $rmFileName
 fi
